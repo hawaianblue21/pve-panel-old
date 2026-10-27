@@ -10,3 +10,8 @@
 .note { text-align: center; margin: 1.6rem 0 3rem; color: var(--ifm-color-emphasis-600); font-size: 0.95rem; }
 .ghost { color: #e8eef6; border-color: rgba(232, 238, 246, 0.45); }
 .ghost:hover { color: #172230; background: #e8eef6; border-color: #e8eef6; }
+.shots { display: grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap: 1.4rem; margin: 0 0 1rem; }
+.figure { margin: 0; text-align: center; }
+.figure img { display: block; max-width: 100%; margin: 0 auto 0.5rem; }
+.figure figcaption { color: var(--ifm-color-emphasis-600); font-size: 0.9rem; }
+@media (max-width: 520px) { .shots { grid-template-columns: 1fr; } }

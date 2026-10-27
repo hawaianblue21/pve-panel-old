@@ -44,10 +44,13 @@ Admins ─────▶ :3001 admin interface ─┘   (localhost only by defa
 | Support | Ticket desk (L1 / L2 / L3), knowledge base, optional Zammad sync, **AI assistant** |
 | Access and security | Roles for administrators, resource pools and GPUs, 2FA, passkeys, single sign-on, API tokens |
 
+Each area has its own guide under **Platform features**: [Snapshots and backups](platform/snapshots-and-backups.md),
+[Clusters and hosts](platform/clusters-and-hosts.md), [Fleet updates](platform/fleet-updates.md),
+[Public IP addresses](platform/public-ips.md), [Storage](platform/storage.md),
+[Plans and billing](platform/plans-and-billing.md), [Support desk](platform/support-desk.md),
+[Access control](platform/access-control.md) and [Importing OS templates](platform/template-import.md).
 The complete, current feature list is in the
-[README](https://github.com/hawaianblue21/pve-panel#-features). The guides below describe the
-original core in detail; newer features are described in the README and in the admin and
-customer portals themselves.
+[README](https://github.com/hawaianblue21/pve-panel#-features).
 
 ## Screenshots
 
@@ -78,6 +81,7 @@ customer portals themselves.
 | [Getting started](getting-started/quick-start.md) | Running the panel for the first time |
 | [Installation](installation/proxmox.md) | Proxmox permissions, Docker, Portainer, NAS, HTTPS |
 | [Features](features/customer-portal.md) | What customers can do |
+| [Platform features](platform/snapshots-and-backups.md) | Backups, clusters, public IPs, storage, billing, support desk, access control |
 | [Networking](networking/customer-networks.md) | Private customer networks, WireGuard, Tailscale |
 | [Templates](guides/templates.md) | Preparing Linux and Windows templates |
 | [Security](security/security-model.md) | Security model, 2FA, single sign-on |

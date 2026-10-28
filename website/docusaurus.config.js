@@ -25,8 +25,8 @@ export default {
     hooks: { onBrokenMarkdownLinks: 'throw' },
   },
 
-  // Screenshots live once, in the repository's docs/screenshots folder
-  staticDirectories: ['static', '../docs/screenshots'],
+  // Screenshots and diagrams live once, in the repository's docs/screenshots and docs/diagrams folders
+  staticDirectories: ['static', '../docs/screenshots', '../docs/diagrams'],
 
   i18n: { defaultLocale: 'en', locales: ['en'] },
 

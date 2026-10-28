@@ -46,28 +46,9 @@ Administrators retain control over templates, quotas, ownership, networking, aut
 
 The browser **never communicates directly with Proxmox VE** and never receives the Proxmox API token.
 
-```text
-┌──────────────────────┐
-│      Customers       │
-└──────────┬───────────┘
-           │ HTTPS :3000
-           ▼
-┌──────────────────────────────────────────────┐
-│                  PVE Panel                   │
-│                                              │
-│  Customer Portal        Admin Interface      │
-│  :3000                  :3001                │
-│                         localhost by default │
-│                                              │
-│  Fastify · SQLite · Jobs · Auth · Audit      │
-└──────────────────────┬───────────────────────┘
-                       │ Proxmox API Token
-                       ▼
-              ┌──────────────────┐
-              │   Proxmox VE     │
-              │ VM · LXC · SDN   │
-              └──────────────────┘
-```
+<p align="center">
+  <img src="docs/diagrams/architecture.svg" alt="PVE Panel architecture: customers and administrators reach two separate web servers; PVE Panel talks to Proxmox VE, Proxmox Backup Server, a WireGuard gateway, SeaweedFS and PowerDNS, and to external services such as single sign-on, payments, email, Zammad and an AI assistant" width="100%">
+</p>
 
 The customer and administration portals run as **separate web servers** in the same process. They use separate session cookies and signing keys, and the customer-facing server does not expose administrator routes.
 
@@ -590,35 +571,7 @@ Screenshots are taken from a test environment with simulated Proxmox clusters an
 
 PVE Panel deliberately separates the customer-facing application from Proxmox VE.
 
-```text
-Customer Browser
-      │
-      │ HTTPS
-      ▼
-┌───────────────┐
-│ Customer UI   │
-│ Port 3000     │
-└───────┬───────┘
-        │
-        ▼
-┌───────────────────────────────┐
-│           PVE Panel           │
-│                               │
-│ Authentication                │
-│ Ownership checks              │
-│ Provisioning jobs             │
-│ Snapshot / power operations   │
-│ Console proxy                 │
-│ Audit logging                 │
-│ SDN / VPN management          │
-└───────────────┬───────────────┘
-                │
-                │ API token
-                ▼
-        ┌───────────────┐
-        │ Proxmox VE    │
-        └───────────────┘
-```
+The diagram above shows the whole picture. Customers only ever talk to the customer portal (`:3000`); the admin portal is a second server on `127.0.0.1:3001`. Only the panel talks to Proxmox and the other services, with credentials the browser never sees.
 
 Every server-specific request is checked against the internal ownership database before PVE Panel contacts Proxmox.
 

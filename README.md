@@ -2001,14 +2001,30 @@ Details: [Tests and quality](https://hawaianblue21.github.io/pve-panel/docs/refe
 
 ## 🗺️ Roadmap
 
-Potential future improvements include:
+Ideas, roughly in the order they are being considered. They are not commitments; the order changes with feedback and
+with what real Proxmox environments show.
 
-- Cross-node placement
-- Integrated backup management
-- Customer-managed firewall rules
-- Additional lifecycle automation
-- PostgreSQL support for multi-instance deployments
-- More quota and billing-oriented functionality
+**Already delivered** (so no longer on this list): backups on Proxmox Backup Server (policies, backup window, restore as a
+new server or over the server, protected backups, file download, encryption, retention add-ons), several Proxmox
+clusters, fleet updates and rollouts, public IPs (IPAM) and OS template import.
+
+| # | Idea | What it means |
+|---|---|---|
+| 1 | **Load-aware placement** | New servers go to the node with the most free CPU, memory and storage, and a customer's servers are spread over nodes. Later: move a server and drain a node, with checks for local disks, GPUs and CPU compatibility. The foundation for the ideas under evaluation below. |
+| 2 | **Customer-managed firewall rules** | Customers manage rules of their own servers (presets such as SSH, HTTP/HTTPS, RDP from my IP). The panel keeps its isolation rules fixed and validates every rule on the server side. |
+| 3 | **Quotas and billing** | Quota requests through tickets, teams (several users sharing servers and billing), usage metering, credit limits and coupons. |
+| 4 | **Lifecycle automation** | Scheduled power on and off, webhooks for events (server created, expiring, backup failed), a refresh pipeline for OS templates, post-provisioning hooks. |
+| 5 | **Backups, next step** | Block storage volumes in backups, an off-site copy on a second Proxmox Backup Server, restore tests with RPO and RTO reporting. |
+| 6 | **Availability** | Replicate the SQLite database to S3-compatible storage and restart quickly on another host. The panel is a control plane: servers keep running while it restarts. |
+| 7 | **PostgreSQL** | Only if active/active operation is really needed. A large change: data access is synchronous today, and schedulers and some state live inside the process. |
+
+**Under evaluation (not scheduled)**
+
+- *Live resize* of vCPU and memory through Proxmox hotplug: Linux guests first, switched on by an administrator per
+  template, with a fallback to the restart that is needed today.
+- *Intel or AMD at provisioning*: a CPU class per node, a choice for the customer, placement on matching nodes. High
+  availability after a hardware failure is configured in Proxmox (strict node-affinity per vendor); live migration
+  between Intel and AMD hosts is not guaranteed to work.
 
 Contributions and ideas are welcome through GitHub Issues and Pull Requests.
 

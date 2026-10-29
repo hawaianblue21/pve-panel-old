@@ -93,7 +93,7 @@ export default {
             items: [{ label: 'AI-assisted development', to: '/docs/about/ai-assisted-development' }],
           },
         ],
-        copyright: `PVE Panel · Built with Docusaurus`,
+        copyright: `PVE Panel · © 2026 Sebastian Flint · MIT License · Built with Docusaurus`,
       },
       prism: {
         theme: prismThemes.github,

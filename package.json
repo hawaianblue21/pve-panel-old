@@ -3,6 +3,8 @@
   "version": "1.13.0",
   "description": "Customer self-service control panel for Proxmox VE",
   "private": true,
+  "license": "MIT",
+  "author": "Sebastian Flint",
   "type": "module",
   "main": "src/server.js",
   "repository": {

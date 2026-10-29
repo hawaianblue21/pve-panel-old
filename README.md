@@ -13,6 +13,7 @@ Give users a clean, secure interface to manage **only their own virtual machines
 [![Docker](https://img.shields.io/badge/Docker-ready-2496ED?logo=docker&logoColor=white)](https://www.docker.com/)
 [![OIDC](https://img.shields.io/badge/Auth-OIDC%20%2B%202FA-6C63FF)](#-authentication)
 [![GHCR](https://img.shields.io/badge/Image-ghcr.io-181717?logo=github)](https://github.com/hawaianblue21/pve-panel/pkgs/container/pve-panel)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Release](https://img.shields.io/github/v/release/hawaianblue21/pve-panel?label=Release)](https://github.com/hawaianblue21/pve-panel/releases)
 [![Build & tests](https://github.com/hawaianblue21/pve-panel/actions/workflows/docker-publish.yml/badge.svg?branch=main)](https://github.com/hawaianblue21/pve-panel/actions/workflows/docker-publish.yml)
 [![CodeQL](https://github.com/hawaianblue21/pve-panel/actions/workflows/codeql.yml/badge.svg?branch=main)](https://github.com/hawaianblue21/pve-panel/actions/workflows/codeql.yml)
@@ -30,6 +31,7 @@ Give users a clean, secure interface to manage **only their own virtual machines
 [Versions](#-versions--updates) ·
 [Security](#️-security-model) ·
 [AI use](#-ai-assisted-development) ·
+[License](#-license) ·
 [Documentation](https://hawaianblue21.github.io/pve-panel/)
 
 </div>
@@ -89,8 +91,7 @@ What that means in practice:
 - **Testing**: the fork's features are covered by the automated suite (API and browser tests) against simulated
   Proxmox, payment gateways, SeaweedFS, PowerDNS, Zammad and LLM services. They have **not yet been validated against a
   real Proxmox cluster**; do that before production use (see [Recommended validation](#-recommended-validation)).
-- **License**: neither upstream nor this fork contains a license file. Clarify the terms with the upstream author
-  before redistributing or offering the software commercially.
+- **License**: MIT, the same license as upstream. The original copyright notice (© 2026 Sebastian Flint) is kept in [LICENSE](LICENSE); see [License](#-license).
 
 ---
 
@@ -1805,6 +1806,7 @@ Only these file names are served, with a strict sandbox policy. Make sure you're
 ├── docker-compose.yml
 ├── Caddyfile
 ├── example.env
+├── LICENSE
 └── package.json
 ```
 
@@ -2078,6 +2080,18 @@ Before using it in a production or internet-facing environment:
 - back up the database
 - validate firewall rules
 - keep Proxmox, Node.js and dependencies up to date
+
+---
+
+## 📄 License
+
+PVE Panel is released under the **[MIT License](LICENSE)**: © 2026 Sebastian Flint (original author of
+[sebastianflint/pve-panel](https://github.com/sebastianflint/pve-panel)). The changes made in this fork are released
+under the same license, and the original copyright notice and license text stay included in [LICENSE](LICENSE).
+
+You may use, copy, modify, distribute and sell it, also in commercial and closed-source setups, as long as the copyright notice and the license text stay included. The software comes **without any warranty**: you run it at your own risk (see *Project status* above).
+
+Third-party components keep their own licenses (MIT, ISC, BSD, Apache-2.0, BlueOak-1.0.0 and others; the browser console noVNC is MPL-2.0). Details: [License](https://hawaianblue21.github.io/pve-panel/docs/about/license).
 
 ---
 

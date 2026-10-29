@@ -133,14 +133,12 @@ export async function updateCluster(req, id, input) {
   const name = input.name !== undefined ? String(input.name).trim() : row.name;
   if (!name || name.length > 60) throw fail(400, 'Name: up to 60 characters');
   const connectionChanged = ['url', 'tokenId', 'tokenSecret', 'verifyTls', 'fingerprint'].some((k) => input[k] !== undefined);
-  let url = row.url;
-  let tokenId = row.token_id;
   if (connectionChanged) {
     const merged = {
       url: input.url ?? row.url, tokenId: input.tokenId ?? row.token_id, tokenSecret: input.tokenSecret,
       verifyTls: input.verifyTls ?? !!row.verify_tls, fingerprint: input.fingerprint === undefined ? row.fingerprint : input.fingerprint,
     };
-    ({ url, tokenId } = check(merged));
+    const { url, tokenId } = check(merged);
     const t = await testCluster(merged, { existingId: id });
     if (!t.ok) throw fail(409, t.error ?? 'The connection test failed');
     db.prepare('UPDATE clusters SET url = ?, token_id = ?, verify_tls = ?, fingerprint = ? WHERE id = ?')

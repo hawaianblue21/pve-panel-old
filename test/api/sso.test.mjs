@@ -3,7 +3,7 @@ import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import path from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
-import { startStack, Session } from '../support/stack.mjs';
+import { startStack } from '../support/stack.mjs';
 import { startMockIdp } from '../support/mock-idp.mjs';
 
 let stack;

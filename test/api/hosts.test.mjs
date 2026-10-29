@@ -2,7 +2,7 @@
 // what each role sees, and maintenance mode keeping new servers off a node.
 import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
-import { startStack, waitFor } from '../support/stack.mjs';
+import { startStack } from '../support/stack.mjs';
 
 let stack;
 let admin;

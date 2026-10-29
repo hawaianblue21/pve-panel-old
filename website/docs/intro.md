@@ -20,11 +20,7 @@ overview of all Proxmox clusters, nodes, alerts and jobs.
 
 ## How it fits together
 
-```text
-Customers ──▶ :3000 customer portal ─┐
-                                     ├─ PVE Panel (Fastify + SQLite) ──(API token)──▶ Proxmox VE
-Admins ─────▶ :3001 admin interface ─┘   (localhost only by default)
-```
+![PVE Panel architecture](/architecture.svg)
 
 - The two ports are **separate web servers** in one process, with separate session
   cookies and signing keys. The customer server has no admin routes at all.

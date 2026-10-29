@@ -91,7 +91,7 @@ What that means in practice:
 - **Testing**: the fork's features are covered by the automated suite (API and browser tests) against simulated
   Proxmox, payment gateways, SeaweedFS, PowerDNS, Zammad and LLM services. They have **not yet been validated against a
   real Proxmox cluster**; do that before production use (see [Recommended validation](#-recommended-validation)).
-- **License**: MIT, the same license as upstream. The original copyright notice (© 2026 Sebastian Flint) is kept in [LICENSE](LICENSE); see [License](#-license).
+- **License**: MIT, the same license as upstream. The original copyright notice (© 2026 Sebastian Flint) is kept in [LICENSE](LICENSE), followed by the fork's (© 2026 hawaianblue21 pve-panel); see [License](#-license).
 
 ---
 
@@ -2085,9 +2085,13 @@ Before using it in a production or internet-facing environment:
 
 ## 📄 License
 
-PVE Panel is released under the **[MIT License](LICENSE)**: © 2026 Sebastian Flint (original author of
-[sebastianflint/pve-panel](https://github.com/sebastianflint/pve-panel)). The changes made in this fork are released
-under the same license, and the original copyright notice and license text stay included in [LICENSE](LICENSE).
+PVE Panel is released under the **[MIT License](LICENSE)**:
+
+- © 2026 Sebastian Flint (original author of [sebastianflint/pve-panel](https://github.com/sebastianflint/pve-panel))
+- © 2026 hawaianblue21 pve-panel (changes made in this fork)
+
+The changes made in this fork are released under the same license, and the original copyright notice and license text
+stay included in [LICENSE](LICENSE).
 
 You may use, copy, modify, distribute and sell it, also in commercial and closed-source setups, as long as the copyright notice and the license text stay included. The software comes **without any warranty**: you run it at your own risk (see *Project status* above).
 

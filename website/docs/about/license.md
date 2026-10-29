@@ -6,7 +6,8 @@ sidebar_position: 2
 PVE Panel is open source under the **MIT License**.
 
 **Copyright © 2026 Sebastian Flint** (original author of
-[sebastianflint/pve-panel](https://github.com/sebastianflint/pve-panel)).
+[sebastianflint/pve-panel](https://github.com/sebastianflint/pve-panel))<br />
+**Copyright © 2026 hawaianblue21 pve-panel** (changes made in this fork)
 
 This repository is a fork. The changes made in the fork are released under the same MIT
 License, and the original copyright notice and license text stay included in every copy.
@@ -36,6 +37,7 @@ file in the repository:
 MIT License
 
 Copyright (c) 2026 Sebastian Flint
+Copyright (c) 2026 hawaianblue21 pve-panel
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

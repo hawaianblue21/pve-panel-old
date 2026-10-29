@@ -54,11 +54,11 @@ export async function startMockSeaweed() {
         const u = users.get(f.UserName);
         switch (f.Action) {
           case 'ListUsers':
-            return xml(res, 200, `<ListUsersResponse><ListUsersResult><Users>${[...users.keys()].map((n) => `<member><UserName>${n}</UserName></member>`).join('')}</Users></ListUsersResult></ListUsersResponse>`);
+            return xml(res, 200, `<ListUsersResponse><ListUsersResult><Users>${[...users.keys()].map((n) => `<member><UserName>${escXml(n)}</UserName></member>`).join('')}</Users></ListUsersResult></ListUsersResponse>`);
           case 'CreateUser':
             if (u) return err(res, 409, 'EntityAlreadyExists');
             users.set(f.UserName, { keys: new Map(), policies: new Map() });
-            return xml(res, 200, `<CreateUserResponse><CreateUserResult><User><UserName>${f.UserName}</UserName></User></CreateUserResult></CreateUserResponse>`);
+            return xml(res, 200, `<CreateUserResponse><CreateUserResult><User><UserName>${escXml(f.UserName)}</UserName></User></CreateUserResult></CreateUserResponse>`);
           case 'DeleteUser':
             if (!u) return err(res, 404, 'NoSuchEntity');
             users.delete(f.UserName);
@@ -68,7 +68,7 @@ export async function startMockSeaweed() {
             const id = `AKMOCK${String(++keySeq).padStart(6, '0')}`;
             const secret = crypto.randomBytes(24).toString('base64url');
             u.keys.set(id, secret);
-            return xml(res, 200, `<CreateAccessKeyResponse><CreateAccessKeyResult><AccessKey><UserName>${f.UserName}</UserName><AccessKeyId>${id}</AccessKeyId><SecretAccessKey>${secret}</SecretAccessKey><Status>Active</Status></AccessKey></CreateAccessKeyResult></CreateAccessKeyResponse>`);
+            return xml(res, 200, `<CreateAccessKeyResponse><CreateAccessKeyResult><AccessKey><UserName>${escXml(f.UserName)}</UserName><AccessKeyId>${escXml(id)}</AccessKeyId><SecretAccessKey>${escXml(secret)}</SecretAccessKey><Status>Active</Status></AccessKey></CreateAccessKeyResult></CreateAccessKeyResponse>`);
           }
           case 'DeleteAccessKey':
             if (!u || !u.keys.delete(f.AccessKeyId)) return err(res, 404, 'NoSuchEntity');
@@ -89,7 +89,7 @@ export async function startMockSeaweed() {
       const name = decodeURIComponent(rawPath.slice(1).split('/')[0] ?? '');
       calls.push(`S3 ${req.method} ${rawPath}`);
       if (req.method === 'GET' && rawPath === '/') {
-        return xml(res, 200, `<ListAllMyBucketsResult><Buckets>${[...buckets.keys()].map((b) => `<Bucket><Name>${b}</Name></Bucket>`).join('')}</Buckets></ListAllMyBucketsResult>`);
+        return xml(res, 200, `<ListAllMyBucketsResult><Buckets>${[...buckets.keys()].map((b) => `<Bucket><Name>${escXml(b)}</Name></Bucket>`).join('')}</Buckets></ListAllMyBucketsResult>`);
       }
       if (req.method === 'PUT') {
         if (buckets.has(name)) return err(res, 409, 'BucketAlreadyOwnedByYou');
@@ -106,8 +106,8 @@ export async function startMockSeaweed() {
       if (req.method === 'GET') {
         const b = buckets.get(name);
         if (!b) return err(res, 404, 'NoSuchBucket');
-        const items = [...b].map(([k, size]) => `<Contents><Key>${k}</Key><Size>${size}</Size></Contents>`).join('');
-        return xml(res, 200, `<ListBucketResult><Name>${name}</Name><IsTruncated>false</IsTruncated>${items}</ListBucketResult>`);
+        const items = [...b].map(([k, size]) => `<Contents><Key>${escXml(k)}</Key><Size>${escXml(size)}</Size></Contents>`).join('');
+        return xml(res, 200, `<ListBucketResult><Name>${escXml(name)}</Name><IsTruncated>false</IsTruncated>${items}</ListBucketResult>`);
       }
       return err(res, 501, 'NotImplemented');
     });

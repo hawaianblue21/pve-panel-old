@@ -1,0 +1,8 @@
+# Code scanning configuration (used by .github/workflows/codeql.yml).
+name: PVE Panel CodeQL configuration
+
+# docs/design holds design mock-ups (.dc.html: HTML with template placeholders such as
+# {{...}}, <sc-for> and <sc-if>). They are not run by the panel, and CodeQL reads the
+# placeholders as JavaScript ("Expression has no effect"), which only adds noise.
+paths-ignore:
+  - docs/design

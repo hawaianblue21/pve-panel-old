@@ -212,7 +212,7 @@ function renderList() {
     ]],
   ];
   $('#rack-actions').innerHTML = groups.map(([title, items]) => [title, items.filter(Boolean)]).filter(([, items]) => items.length)
-    .map(([title, items]) => `<div class="nav-group"><h2 class="nav-group-label">${title.replace('&', '&amp;')}</h2>${items.join('')}</div>`).join('');
+    .map(([title, items]) => `<div class="nav-group"><h2 class="nav-group-label">${esc(title)}</h2>${items.join('')}</div>`).join('');
 
   $('#vm-count').textContent = state.vms.length ? String(state.vms.length) : '';
   $('#vm-list').innerHTML = state.vms.length ? state.vms.map((vm) => `

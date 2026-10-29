@@ -3,6 +3,7 @@ import { Agent, buildConnector, fetch, FormData } from 'undici';
 import { config } from './config.js';
 import { db } from './db.js';
 import { open } from './secrets.js';
+import { trimSlash } from './strings.js';
 
 // ---- Clusters ---------------------------------------------------------------------------------
 // The main cluster comes from PVE_URL / PVE_TOKEN_*; further clusters are added
@@ -48,7 +49,7 @@ function extraClusters() {
     let secret = '';
     try { secret = open(CLUSTER_PURPOSE, r.token_secret); } catch { /* re-enter the secret */ }
     return {
-      id: r.id, key: r.key, name: r.name, url: r.url.replace(/\/+$/, ''), auth: `PVEAPIToken=${r.token_id}=${secret}`,
+      id: r.id, key: r.key, name: r.name, url: trimSlash(r.url), auth: `PVEAPIToken=${r.token_id}=${secret}`,
       dispatcher: dispatcherFor({ url: r.url, verifyTls: !!r.verify_tls, fingerprint: r.fingerprint }), main: false,
       verifyTls: !!r.verify_tls, fingerprint: r.fingerprint ? r.fingerprint.replace(/:/g, '').toLowerCase() : null,
     };

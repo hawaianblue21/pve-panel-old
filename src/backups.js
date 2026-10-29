@@ -19,6 +19,7 @@ import { db, audit } from './db.js';
 import { seal, open } from './secrets.js';
 import { rawRequest, dispatcherFor, allClusters, clusterById, pve } from './pve.js';
 import { fingerprintOf } from './clusters.js';
+import { trimSlash } from './strings.js';
 
 const KEY = 'backup';
 const PURPOSE = 'pbs-token';
@@ -79,7 +80,7 @@ export function saveBackupSettings(input) {
 
 const authOf = (tokenId, secret) => `PBSAPIToken=${tokenId}:${secret}`;
 const pbsConn = (row, secret = null) => ({
-  id: row.id ?? -1, name: row.name ?? 'pbs', main: false, url: String(row.url).replace(/\/+$/, ''),
+  id: row.id ?? -1, name: row.name ?? 'pbs', main: false, url: trimSlash(row.url),
   auth: authOf(row.token_id ?? row.tokenId, secret ?? open(PURPOSE, row.token_secret)),
   dispatcher: dispatcherFor({ url: row.url, verifyTls: !row.fingerprint, fingerprint: row.fingerprint ?? null }),
 });
@@ -91,7 +92,7 @@ export const pbsApi = (row) => {
 function checkInput(input) {
   const name = String(input.name ?? '').trim().toLowerCase();
   if (!/^[a-z][a-z0-9-]{0,30}$/.test(name)) throw fail(400, 'Name: lowercase letters, digits and dashes, e.g. pbs-jkt');
-  const url = String(input.url ?? '').trim().replace(/\/+$/, '');
+  const url = trimSlash(String(input.url ?? '').trim());
   if (!/^https?:\/\/[^\s/]+$/.test(url)) throw fail(400, 'Address: https://host:8007 (no path)');
   const tokenId = String(input.tokenId ?? '').trim();
   if (!/^[\w.-]+@[\w.-]+![\w.-]+$/.test(tokenId)) throw fail(400, 'API token ID: user@realm!tokenname');

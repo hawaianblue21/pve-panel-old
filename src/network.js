@@ -12,6 +12,7 @@
 import { db } from './db.js';
 import { config } from './config.js';
 import { pve, waitTask, serial, locateGuest, guestPath, clusterGuests } from './pve.js';
+import { trimDashes } from './strings.js';
 
 const { zone, prefix, dns } = config.network;
 const ALL_CUSTOMERS = `${prefix}.0.0/16`;
@@ -115,7 +116,7 @@ export async function ensureNetwork(userId, clusterId = 0) {
 export function vnetAlias(userId) {
   const email = db.prepare('SELECT email FROM users WHERE id = ?').get(userId)?.email ?? '';
   const [local, domain] = email.split('@');
-  const clean = (t) => (t ?? '').replace(/[^A-Za-z0-9._-]+/g, '-').replace(/^-+|-+$/g, '');
+  const clean = (t) => trimDashes(String(t ?? '').slice(0, 200).replace(/[^A-Za-z0-9._-]+/g, '-'));
   const alias = domain ? `${clean(local)} (${clean(domain)})` : clean(local);
   return (alias || `customer ${userId}`).slice(0, 200);
 }

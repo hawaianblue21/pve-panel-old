@@ -19,6 +19,7 @@ import { db, audit } from './db.js';
 import { seal, open } from './secrets.js';
 import { sign, encodePath } from './sigv4.js';
 import { checkPoolCapacity, poolOfUser } from './pools.js';
+import { trimSlash } from './strings.js';
 
 const KEY = 's3';
 const PURPOSE = 's3-admin-secret';
@@ -38,7 +39,7 @@ const read = () => {
   return row ? JSON.parse(row.value) : null;
 };
 
-const trimUrl = (u) => (u ?? '').trim().replace(/\/+$/, '');
+const trimUrl = (u) => trimSlash((u ?? '').trim());
 
 export function s3Settings() {
   const s = read();

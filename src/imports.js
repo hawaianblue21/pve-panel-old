@@ -32,6 +32,7 @@ import fs from 'node:fs';
 import { pve, allClusters, clusterById, serial, invalidateGuestCache, sleep, rawUpload } from './pve.js';
 import { completedUpload, removeUpload, cleanUploads } from './uploads.js';
 import { agentExec } from './agent.js';
+import { trimSlash, trimDashes } from './strings.js';
 
 const fail = (status, message) => Object.assign(new Error(message), { statusCode: status, expose: true });
 const PARALLEL = Math.max(1, Number(process.env.TEMPLATE_IMPORTS_PARALLEL || 2));
@@ -41,7 +42,7 @@ const FORMATS = ['qcow2', 'ova', 'iso', 'vmdk'];
 export const VIRTIO_URL = 'https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/stable-virtio/virtio-win.iso';
 const STEP = { queued: 'Waiting', downloading: 'Downloading', creating: 'Creating the VM', installing: 'Waiting for the installation', testing: 'Test boot', ready: 'Ready', failed: 'Failed' };
 const nowIso = () => new Date().toISOString();
-const slug = (s) => String(s).toLowerCase().replace(/[^a-z0-9-]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40) || 'image';
+const slug = (s) => trimDashes(String(s).toLowerCase().slice(0, 200).replace(/[^a-z0-9-]+/g, '-')).slice(0, 40) || 'image';
 
 // ---- Options: where an import can go ---------------------------------------------------
 
@@ -152,7 +153,7 @@ export const pubImport = (r) => ({
   clusterId: r.cluster_id, cluster: clusterById(r.cluster_id)?.name ?? String(r.cluster_id), node: r.node, storage: r.storage, importStorage: r.import_storage,
   setup: r.setup, options: JSON.parse(r.options || '{}'), vmid: r.vmid, state: r.state, step: r.step, error: r.error,
   test: r.test ? JSON.parse(r.test) : null, createdAt: r.created_at, finishedAt: r.finished_at,
-  consoleUrl: r.state === 'installing' && r.vmid && clusterById(r.cluster_id)?.url ? `${String(clusterById(r.cluster_id).url).replace(/\/+$/, '')}/#v1:0:=qemu%2F${r.vmid}:4:::::::` : null,
+  consoleUrl: r.state === 'installing' && r.vmid && clusterById(r.cluster_id)?.url ? `${trimSlash(clusterById(r.cluster_id).url)}/#v1:0:=qemu%2F${r.vmid}:4:::::::` : null,
 });
 export const listImports = (limit = 100) => db.prepare('SELECT * FROM template_imports ORDER BY id DESC LIMIT ?').all(limit).map(pubImport);
 /** The latest finished import of a template VMID (for the templates table). */

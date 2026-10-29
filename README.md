@@ -79,10 +79,9 @@ updates, server expiry and the Docker setup. The fork adds:
 
 What that means in practice:
 
-- **Container image**: `ghcr.io/hawaianblue21/pve-panel`. Pushes to `main` publish the tag `edge`; `latest` and version
-  tags appear only after a release tag (`git tag v1.13.0 && git push --tags`). Until then set
-  `PANEL_IMAGE=ghcr.io/hawaianblue21/pve-panel:edge`. A new GHCR package is private by default: make it public under
-  the repository's **Packages** settings, or `docker login ghcr.io` on the host.
+- **Container image**: `ghcr.io/hawaianblue21/pve-panel` (public). A release tag (`git tag v1.13.1 && git push --tags`)
+  publishes `1.13.1`, `1.13`, `1` and `latest`; pushes to `main` publish `edge`, a development build for testing.
+  For a stable setup use a version tag or `latest` (`PANEL_IMAGE=ghcr.io/hawaianblue21/pve-panel:1.13.1`).
 - **Documentation website**: `https://hawaianblue21.github.io/pve-panel/` is built from `website/` by the Documentation
   workflow and is online once GitHub Pages is enabled (**Settings → Pages → Source: GitHub Actions**). Pages that
   describe fork features are summarized in this README; `docs/design/README.md` tracks the UI status per screen.

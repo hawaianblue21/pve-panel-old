@@ -10,11 +10,17 @@ There is nothing to compile: the panel uses Node's built-in `node:sqlite`.
 
 | Item | Requirement |
 |---|---|
-| Node.js | **22.13 or newer** (`node -v`) |
+| Node.js | **22.13 or newer** (`node -v`), the newest patch release of 22 or 24 (see the warning below) |
 | Host | Linux with `git`; 1 vCPU and 1 GB RAM are enough to start |
 | Network | Outbound HTTPS to the Proxmox API (port 8006); inbound TCP 3000 (customer portal), or 443 on a reverse proxy |
 | Proxmox | An API token for the panel and the `customers` pool, see [Proxmox permissions](proxmox.md) |
 | Clock | Correct time (NTP): two-factor codes depend on it |
+
+:::warning Keep Node.js patched
+Use the newest patch release of Node.js 22 or 24 (at least **22.23.4** or **24.22.1**,
+which fix CVE-2026-111497 in the bundled Brotli decoder and further security issues).
+The Docker image already contains a fixed version.
+:::
 
 ## 1. Get the panel
 

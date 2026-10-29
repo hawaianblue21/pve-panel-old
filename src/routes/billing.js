@@ -59,5 +59,5 @@ export default async function billingRoutes(app) {
   app.put('/api/billing/profile', {
     ...auth,
     schema: { body: { type: 'object', additionalProperties: false, properties: { name: { type: 'string', maxLength: 120 }, address: { type: 'string', maxLength: 300 }, taxId: { type: 'string', maxLength: 60 } } } },
-  }, async (req) => billing.saveProfile(req.account.id, req.body));
+  }, async (req, reply) => reply.type('application/json; charset=utf-8').send(billing.saveProfile(req.account.id, req.body)));
 }

@@ -8,6 +8,7 @@
 //   { role: 'assistant', content, toolCalls: [{ id, name, input }] }
 //   { role: 'tool', toolCallId, name, content }
 // Returns { text, toolCalls, usage: { input, output }, stop }.
+import { trimSlash } from './strings.js';
 
 export const ANTHROPIC_VERSION = '2023-06-01';
 
@@ -58,7 +59,7 @@ function toAnthropic(messages) {
 }
 
 async function anthropic({ baseUrl, apiKey, model, system, messages, tools, maxTokens, timeoutMs }) {
-  const data = await post(`${(baseUrl || 'https://api.anthropic.com').replace(/\/+$/, '')}/v1/messages`, {
+  const data = await post(`${trimSlash(baseUrl || 'https://api.anthropic.com')}/v1/messages`, {
     'x-api-key': apiKey, 'anthropic-version': ANTHROPIC_VERSION,
   }, {
     model, max_tokens: maxTokens, system, messages: toAnthropic(messages),
@@ -93,7 +94,7 @@ function toOpenAi(system, messages) {
 
 async function openai({ baseUrl, apiKey, model, system, messages, tools, maxTokens, timeoutMs }) {
   if (!baseUrl) throw new ProviderError('Set the address of the OpenAI-compatible API (e.g. https://api.openai.com/v1)', 400);
-  const data = await post(`${baseUrl.replace(/\/+$/, '')}/chat/completions`, apiKey ? { authorization: `Bearer ${apiKey}` } : {}, {
+  const data = await post(`${trimSlash(baseUrl)}/chat/completions`, apiKey ? { authorization: `Bearer ${apiKey}` } : {}, {
     model, max_tokens: maxTokens, messages: toOpenAi(system, messages),
     ...(tools.length ? { tools: tools.map((t) => ({ type: 'function', function: { name: t.name, description: t.description, parameters: t.parameters } })), tool_choice: 'auto' } : {}),
   }, timeoutMs);

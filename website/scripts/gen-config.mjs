@@ -52,7 +52,7 @@ const sections = TOPICS.map(([title]) => title).concat('Other')
   .map((title) => ({ title, rows: rows.filter((r) => topicOf(r.key) === title) }))
   .filter((s) => s.rows.length);
 
-const cell = (t) => String(t).replace(/\|/g, '\\|').trim();
+const cell = (t) => String(t).replace(/\\/g, '\\\\').replace(/\|/g, '\\|').trim();
 let md = `---
 title: Configuration (.env)
 sidebar_position: 1

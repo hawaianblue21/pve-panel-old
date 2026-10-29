@@ -7,12 +7,13 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { trimSlash } from './strings.js';
 
 const root = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 const pkg = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
 
-const repoUrl = (process.env.PANEL_REPO_URL
-  || String(pkg.repository?.url ?? '').replace(/^git\+/, '').replace(/\.git$/, '')).replace(/\/+$/, '');
+const repoUrl = trimSlash(process.env.PANEL_REPO_URL
+  || String(pkg.repository?.url ?? '').replace(/^git\+/, '').replace(/\.git$/, ''));
 const repoPath = /github\.com\/([^/]+\/[^/]+)/.exec(repoUrl)?.[1] ?? null;
 
 const stamped = process.env.PANEL_VERSION && process.env.PANEL_VERSION !== 'dev';

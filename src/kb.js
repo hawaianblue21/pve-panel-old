@@ -7,12 +7,13 @@
 // are the list of articles still missing.
 
 import { db } from './db.js';
+import { trimDashes } from './strings.js';
 
 const fail = (status, message) => Object.assign(new Error(message), { statusCode: status, expose: true });
 export const VISIBILITY = ['public', 'customers', 'internal'];
 
-const slugify = (title) => title.toLowerCase().normalize('NFKD').replace(/[̀-ͯ]/g, '')
-  .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60) || 'article';
+const slugify = (title) => trimDashes(title.toLowerCase().slice(0, 300).normalize('NFKD').replace(/[̀-ͯ]/g, '')
+  .replace(/[^a-z0-9]+/g, '-')).slice(0, 60) || 'article';
 
 function uniqueSlug(title, exceptId = null) {
   const base = slugify(title);

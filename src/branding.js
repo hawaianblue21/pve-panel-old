@@ -14,6 +14,13 @@ export const brandingDir = path.resolve(config.brand.dir || path.join(path.dirna
 // Files the panel serves from the branding folder
 export const SERVED_FILE = /^(os-(windows|linux)|logo|favicon)\.(svg|png|webp)$/;
 const ASSETS = { logo: { maxBytes: 512 * 1024 }, favicon: { maxBytes: 128 * 1024 } };
+const ASSET_KINDS = ['logo', 'favicon'];
+/** The fixed file name for an image kind, or an error: nothing from the request reaches a path. */
+const assetKind = (kind) => {
+  const k = ASSET_KINDS.find((x) => x === kind);
+  if (!k) throw fail(404, 'Unknown image');
+  return k;
+};
 const TYPES = { 'image/svg+xml': 'svg', 'image/png': 'png', 'image/webp': 'webp' };
 
 const fail = (status, message) => Object.assign(new Error(message), { statusCode: status, expose: true });
@@ -63,7 +70,7 @@ export function saveBranding(input) {
   }
   if (typeof input.supportUrl === 'string') {
     const url = input.supportUrl.trim();
-    if (url && !/^(https:\/\/[^\s<>"']+|mailto:[^\s<>"']+@[^\s<>"']+)$/i.test(url)) {
+    if (url && !/^(https:\/\/[^\s<>"']+|mailto:[^\s<>"'@]+@[^\s<>"'@]+)$/i.test(url)) {
       throw fail(400, 'Support link: an https:// address or mailto:');
     }
     next.supportUrl = url || undefined;
@@ -77,8 +84,8 @@ export function saveBranding(input) {
 const ACTIVE_SVG = /<script|<foreignObject|\son[a-z]+\s*=|javascript:|<iframe|<embed|<object|xlink:href\s*=\s*["']\s*(?!#)|href\s*=\s*["']\s*(?!#|data:image\/)/i;
 
 /** Saves an uploaded logo or favicon (base64 data). */
-export function saveAsset(kind, { type, data }) {
-  if (!ASSETS[kind]) throw fail(404, 'Unknown image');
+export function saveAsset(kindInput, { type, data }) {
+  const kind = assetKind(kindInput);
   const ext = TYPES[type];
   if (!ext) throw fail(400, 'Use an SVG, PNG or WebP image');
   const buf = Buffer.from(String(data ?? ''), 'base64');
@@ -98,8 +105,8 @@ export function saveAsset(kind, { type, data }) {
   return branding();
 }
 
-export function removeAsset(kind) {
-  if (!ASSETS[kind]) throw fail(404, 'Unknown image');
+export function removeAsset(kindInput) {
+  const kind = assetKind(kindInput);
   for (const ext of Object.values(TYPES)) fs.rmSync(path.join(brandingDir, `${kind}.${ext}`), { force: true });
   return branding();
 }

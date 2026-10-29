@@ -458,7 +458,7 @@ export default async function adminRoutes(app) {
   });
 
   // ---- Settings: branding (white-label) -------------------------------------------
-  app.get('/api/admin/settings/branding', async () => branding());
+  app.get('/api/admin/settings/branding', { config: { rateLimit: { max: 120, timeWindow: '1 minute' } } }, async () => branding());
   app.put('/api/admin/settings/branding', {
     schema: {
       body: {

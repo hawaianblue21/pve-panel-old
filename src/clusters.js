@@ -14,6 +14,7 @@ import { config } from './config.js';
 import {
   CLUSTER_PURPOSE, allClusters, clusterById, invalidateClusters, rawRequest, dispatcherFor, clusterGuests, refreshNodeMap, vmidCollisions, pve,
 } from './pve.js';
+import { trimSlash } from './strings.js';
 
 const fail = (status, message) => Object.assign(new Error(message), { statusCode: status, expose: true });
 
@@ -33,7 +34,7 @@ export function fingerprintOf(url) {
 }
 
 function check(input) {
-  const url = String(input.url ?? '').trim().replace(/\/+$/, '');
+  const url = trimSlash(String(input.url ?? '').trim());
   if (!/^https?:\/\/[^\s/]+$/.test(url)) throw fail(400, 'Address: https://host:8006 (no path)');
   const tokenId = String(input.tokenId ?? '').trim();
   if (!/^[\w.-]+@[\w.-]+![\w.-]+$/.test(tokenId)) throw fail(400, 'API token ID: user@realm!tokenname');

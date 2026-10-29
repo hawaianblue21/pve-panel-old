@@ -15,6 +15,7 @@ import crypto from 'node:crypto';
 import { db, audit } from './db.js';
 import { seal, open } from './secrets.js';
 import { setSync, notifyCustomer } from './support.js';
+import { trimSlash } from './strings.js';
 
 const KEY = 'zammad';
 const PURPOSE = 'zammad-token';
@@ -38,7 +39,7 @@ const reveal = (sealed) => { try { return sealed ? open(PURPOSE, sealed) : ''; }
 function current() {
   const s = stored();
   return {
-    enabled: !!s.enabled, url: (s.url ?? '').replace(/\/+$/, ''), token: reveal(s.token), secret: reveal(s.secret),
+    enabled: !!s.enabled, url: trimSlash(s.url), token: reveal(s.token), secret: reveal(s.secret),
     groups: { L1: 'Users', L2: 'Users', L3: 'Users', ...(s.groups ?? {}) },
   };
 }
@@ -57,11 +58,27 @@ export function zammadSettings(publicUrl) {
   };
 }
 
+const ENTITIES = { nbsp: ' ', lt: '<', gt: '>', amp: '&' };
+/** Zammad article HTML to plain text: tags are removed until none are left, then the four
+ *  common entities are decoded in a single pass (so "&amp;lt;" becomes "&lt;", not "<"). */
+function htmlToText(html) {
+  let s = String(html ?? '').replace(/<br\s*\/?>/gi, '\n').replace(/<\/p>/gi, '\n');
+  for (let prev = null; prev !== s;) { prev = s; s = s.replace(/<[^<>]*>/g, ''); }
+  return s.replace(/&(nbsp|lt|gt|amp);/g, (m, name) => ENTITIES[name]).trim();
+}
+
+/** "Anna Lee <anna@example.com>" to "Anna Lee": the part before the first "<". */
+function senderName(from) {
+  const s = String(from ?? '').slice(0, 300);
+  const i = s.indexOf('<');
+  return (i >= 0 ? s.slice(0, i) : s).trim();
+}
+
 export function saveZammad(input) {
   const s = stored();
   const next = { ...s };
   if (typeof input.url === 'string') {
-    const url = input.url.trim().replace(/\/+$/, '');
+    const url = trimSlash(input.url.trim());
     if (url && !/^https:\/\/[^\s/]+/.test(url) && !(process.env.NODE_ENV === 'test' && /^http:\/\/127\.0\.0\.1:\d+/.test(url))) {
       throw fail(400, 'Zammad address: https://helpdesk.example.com');
     }
@@ -246,12 +263,11 @@ export async function zammadWebhook(req, reply) {
   if (a?.id && !db.prepare('SELECT 1 FROM ticket_messages WHERE zammad_article_id = ?').get(Number(a.id))) {
     const sender = nameOf(a.sender).toLowerCase();
     const author = sender === 'customer' ? 'customer' : sender === 'system' ? 'system' : 'agent';
-    const body = String(a.body ?? '').replace(/<br\s*\/?>/gi, '\n').replace(/<\/p>/gi, '\n').replace(/<[^>]+>/g, '')
-      .replace(/&nbsp;/g, ' ').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&').trim().slice(0, 20_000);
+    const body = htmlToText(a.body).slice(0, 20_000);
     if (body) {
       const by = a.created_by;
       const name = author === 'agent'
-        ? (typeof by === 'object' && by ? [by.firstname, by.lastname].filter(Boolean).join(' ') : '') || String(a.from ?? '').replace(/<.*>/, '').trim() || 'Support'
+        ? (typeof by === 'object' && by ? [by.firstname, by.lastname].filter(Boolean).join(' ') : '') || senderName(a.from) || 'Support'
         : null;
       added = Number(db.prepare(`INSERT INTO ticket_messages (ticket_id, author, author_name, body, internal, zammad_article_id)
         VALUES (?, ?, ?, ?, ?, ?)`).run(t.id, author, name, body, a.internal ? 1 : 0, Number(a.id)).lastInsertRowid);

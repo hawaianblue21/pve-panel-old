@@ -16,6 +16,7 @@ import { clusterGuests } from './pve.js';
 import { chat, ProviderError } from './ai-providers.js';
 import * as kb from './kb.js';
 import * as support from './support.js';
+import { trimSlash } from './strings.js';
 
 const KEY = 'ai_assistant';
 const PURPOSE = 'ai-api-key';
@@ -52,7 +53,7 @@ export function saveAiSettings(input) {
     next.provider = input.provider;
   }
   if (typeof input.baseUrl === 'string') {
-    const u = input.baseUrl.trim().replace(/\/+$/, '');
+    const u = trimSlash(input.baseUrl.trim());
     // http is allowed for a model running in your own network (e.g. Ollama)
     if (u && !/^https?:\/\/[^\s/]+/.test(u)) throw fail(400, 'API address: https://… (or http://… for a model in your own network)');
     next.baseUrl = u;

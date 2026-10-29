@@ -28,6 +28,7 @@ import { db, audit } from './db.js';
 import { pve, clusterGuests, guestPath, guestMayBeHidden, HiddenGuestError } from './pve.js';
 import { seal, open } from './secrets.js';
 import { datacenterOfNode, datacenterById, checkPoolCapacity } from './pools.js';
+import { trimSlash } from './strings.js';
 
 const KEY = 'ipam';
 const PURPOSE = 'ipam-powerdns';
@@ -138,7 +139,7 @@ export function saveIpamSettings(input) {
   if (input.powerdns) {
     const p = input.powerdns;
     if (typeof p.url === 'string') {
-      const u = p.url.trim().replace(/\/+$/, '');
+      const u = trimSlash(p.url.trim());
       if (u && !/^https?:\/\/[^\s/]+(\/.*)?$/.test(u)) throw fail(400, 'PowerDNS API address: http(s)://host:8081');
       s.powerdns.url = u;
     }

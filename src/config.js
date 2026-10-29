@@ -1,4 +1,5 @@
 import 'dotenv/config';
+import { trimSlash } from './strings.js';
 
 function required(key) {
   const value = process.env[key];
@@ -23,7 +24,7 @@ export const config = {
   cookieSecure: process.env.COOKIE_SECURE !== 'false',
   dbPath: process.env.DB_PATH || './data/panel.db',
   pve: {
-    url: required('PVE_URL').replace(/\/+$/, ''),
+    url: trimSlash(required('PVE_URL')),
     tokenId: required('PVE_TOKEN_ID'),
     tokenSecret: required('PVE_TOKEN_SECRET'),
     verifyTls: process.env.PVE_VERIFY_TLS !== 'false',
@@ -68,8 +69,8 @@ export const config = {
     label: (process.env.OIDC_BUTTON_LABEL || 'Sign in with single sign-on').trim().slice(0, 60),
     scopes: (process.env.OIDC_SCOPES || 'openid email profile').trim(),
     publicUrl: {
-      customer: (process.env.PANEL_PUBLIC_URL || '').replace(/\/+$/, ''),
-      admin: (process.env.ADMIN_PUBLIC_URL || '').replace(/\/+$/, ''),
+      customer: trimSlash(process.env.PANEL_PUBLIC_URL || ''),
+      admin: trimSlash(process.env.ADMIN_PUBLIC_URL || ''),
     },
     allowedDomains: (process.env.OIDC_ALLOWED_DOMAINS || '').split(',').map((d) => d.trim().toLowerCase()).filter(Boolean),
     requireVerifiedEmail: process.env.OIDC_REQUIRE_VERIFIED_EMAIL !== 'false',

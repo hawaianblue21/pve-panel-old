@@ -104,9 +104,10 @@ export function publicSettings() {
 }
 
 export function saveProvider(id, input) {
-  if (!PROVIDERS[id]) throw Object.assign(new Error('Unknown provider'), { statusCode: 404, expose: true });
+  const pid = PROVIDER_IDS.find((x) => x === id);
+  if (!pid) throw Object.assign(new Error('Unknown provider'), { statusCode: 404, expose: true });
   const all = stored();
-  const next = { ...DEFAULTS, ...(all[id] ?? {}) };
+  const next = { ...DEFAULTS, ...(all[pid] ?? {}) };
   if (typeof input.clientId === 'string') next.clientId = input.clientId.trim();
   if (typeof input.clientSecret === 'string' && input.clientSecret) next.secret = seal(PURPOSE, input.clientSecret.trim());
   if (Array.isArray(input.portals)) next.portals = [...new Set(input.portals.filter((p) => ['customer', 'admin'].includes(p)))];
@@ -116,7 +117,7 @@ export function saveProvider(id, input) {
     const bad = next.allowedDomains.find((d) => !/^[a-z0-9.-]+\.[a-z]{2,}$/.test(d));
     if (bad) throw Object.assign(new Error(`"${bad}" is not a domain like example.com`), { statusCode: 400, expose: true });
   }
-  if (id === 'microsoft' && typeof input.tenant === 'string') {
+  if (pid === 'microsoft' && typeof input.tenant === 'string') {
     const t = input.tenant.trim() || 'organizations';
     if (!MS_SHARED_TENANTS.includes(t) && !/^[0-9a-f-]{36}$/i.test(t) && !/^[a-z0-9-]+(\.[a-z0-9-]+)+$/i.test(t)) {
       throw Object.assign(new Error('Tenant: organizations, common, consumers, a tenant ID or a domain'), { statusCode: 400, expose: true });
@@ -127,11 +128,11 @@ export function saveProvider(id, input) {
   if (next.enabled && (!next.clientId || !secretOf(next))) {
     throw Object.assign(new Error('Enter the client ID and secret before switching it on'), { statusCode: 400, expose: true });
   }
-  all[id] = next;
+  all[pid] = next;
   db.prepare(`INSERT INTO settings (key, value, updated_at) VALUES (?, ?, datetime('now'))
     ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at`).run(KEY, JSON.stringify(all));
-  discovery.delete(id);
-  return publicSettings().providers.find((p) => p.id === id);
+  discovery.delete(pid);
+  return publicSettings().providers.find((p) => p.id === pid);
 }
 
 // ---- OpenID Connect providers (Google, Microsoft) ----------------------------------
@@ -187,7 +188,7 @@ export async function startLogin(id, scope) {
  */
 export async function finishLogin(id, scope, query, tx) {
   const s = settingsOf(id);
-  if (!PROVIDERS[id] || tx.provider !== id) throw new SsoError('failed', 'Provider does not match the sign-in that was started');
+  if (!PROVIDER_IDS.includes(id) || tx.provider !== id) throw new SsoError('failed', 'Provider does not match the sign-in that was started');
   if (!usable(id, s, scope)) throw new SsoError('unavailable', `${id} is no longer set up for the ${scope} portal`);
   if (PROVIDERS[id].kind === 'github') return githubIdentity(s, scope, query, tx);
 

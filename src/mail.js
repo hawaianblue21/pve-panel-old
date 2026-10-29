@@ -7,6 +7,7 @@ import { config } from './config.js';
 import { seal, open } from './secrets.js';
 import { schemeColors } from './appearance.js';
 import { brandName } from './branding.js';
+import { trimSlash } from './strings.js';
 
 const KEY = 'email';
 const PURPOSE = 'smtp-password';
@@ -48,7 +49,7 @@ export function saveEmailSettings(input) {
     username: (input.username ?? '').trim(),
     fromName: (input.fromName ?? '').trim(),
     fromAddress: input.fromAddress.trim(),
-    panelUrl: input.panelUrl.trim().replace(/\/+$/, ''),
+    panelUrl: trimSlash(input.panelUrl.trim()),
     password: input.password === undefined ? current.password
       : input.password === '' ? null
       : seal(PURPOSE, input.password),
@@ -273,7 +274,7 @@ export function expirySummaryMessage(summary) {
 /** A support agent answered a customer's ticket. */
 export function ticketReplyMessage(ticket, body) {
   const panel = emailSettings().panelUrl;
-  const link = panel ? `${panel.replace(/\/+$/, '')}/#support/${ticket.number}` : '';
+  const link = panel ? `${trimSlash(panel)}/#support/${ticket.number}` : '';
   const title = `New reply to your ticket #${ticket.number}: ${ticket.subject}`;
   const lines = [`Support answered your ticket “${ticket.subject}”:`, body.length > 4000 ? `${body.slice(0, 4000)}…` : body];
   return {
@@ -295,7 +296,7 @@ const rupiah = (n) => `Rp ${Number(n).toLocaleString('id-ID')}`;
 /** Receipt after an invoice was paid. */
 export function paymentReceiptMessage(inv, expiresAt) {
   const panel = emailSettings().panelUrl;
-  const link = panel ? `${panel.replace(/\/+$/, '')}/#billing/${inv.number}` : '';
+  const link = panel ? `${trimSlash(panel)}/#billing/${inv.number}` : '';
   const title = `Payment received: ${inv.number}`;
   const lines = [
     `Thank you. We received ${rupiah(inv.total)} for invoice ${inv.number}${inv.paidVia ? ` (${inv.paidVia})` : ''}.`,
@@ -314,7 +315,7 @@ export function paymentReceiptMessage(inv, expiresAt) {
 /** Auto-renew could not pay from the wallet. */
 export function autoRenewFailedMessage(inv, balance) {
   const panel = emailSettings().panelUrl;
-  const link = panel ? `${panel.replace(/\/+$/, '')}/#billing/${inv.number}` : '';
+  const link = panel ? `${trimSlash(panel)}/#billing/${inv.number}` : '';
   const title = `Please renew: not enough balance for ${inv.number}`;
   const lines = [
     `Your server is set to renew automatically, but the wallet has ${rupiah(balance)} and the renewal costs ${rupiah(inv.total)}.`,
@@ -330,7 +331,7 @@ export function autoRenewFailedMessage(inv, balance) {
 /** Dunning: a renewal invoice is waiting (issued, or a reminder before the due date). */
 export function invoiceDueMessage(inv, { server, days, balance, autoCharge }) {
   const panel = emailSettings().panelUrl;
-  const link = panel ? `${panel.replace(/\/+$/, '')}/#billing/${inv.number}` : '';
+  const link = panel ? `${trimSlash(panel)}/#billing/${inv.number}` : '';
   const title = days <= 1 ? `Last reminder: ${inv.number} is due tomorrow` : `Invoice ${inv.number} for ${server}: due ${fmtDate(inv.dueAt)}`;
   const covered = autoCharge && balance >= inv.total;
   const lines = [
@@ -351,7 +352,7 @@ export function invoiceDueMessage(inv, { server, days, balance, autoCharge }) {
 /** Dunning: the due date passed without payment; the server stops on stopAt. */
 export function invoiceOverdueMessage(inv, { server, stopAt }) {
   const panel = emailSettings().panelUrl;
-  const link = panel ? `${panel.replace(/\/+$/, '')}/#billing/${inv.number}` : '';
+  const link = panel ? `${trimSlash(panel)}/#billing/${inv.number}` : '';
   const title = `Overdue: ${inv.number} for ${server}`;
   const lines = [
     `Invoice ${inv.number} (${rupiah(inv.total)}) for your server “${server}” was due on ${fmtDate(inv.dueAt)} and is not paid yet.`,
@@ -367,7 +368,7 @@ export function invoiceOverdueMessage(inv, { server, stopAt }) {
 /** A provider rollout is installing updates on the customer's server. */
 export function rolloutNoticeMessage(server, { scope, snapshot, autoRestart }) {
   const panel = emailSettings().panelUrl;
-  const link = panel ? `${panel.replace(/\/+$/, '')}/#${server.vmid}` : '';
+  const link = panel ? `${trimSlash(panel)}/#${server.vmid}` : '';
   const title = `Updates are being installed on ${server.name}`;
   const lines = [
     `Your provider is installing ${scope === 'all' ? 'all available' : 'security'} updates on ${server.name} (${server.vmid}).`,

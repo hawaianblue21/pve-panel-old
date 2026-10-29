@@ -30,7 +30,8 @@ function verify(req, rawPath, query, body) {
 }
 
 const xml = (res, code, body) => { res.writeHead(code, { 'content-type': 'application/xml' }); res.end(`<?xml version="1.0" encoding="UTF-8"?>${body}`); };
-const err = (res, code, c, msg = c) => xml(res, code, `<Error><Code>${c}</Code><Message>${msg}</Message></Error>`);
+const escXml = (s) => String(s).replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&apos;' }[ch]));
+const err = (res, code, c, msg = c) => xml(res, code, `<Error><Code>${escXml(c)}</Code><Message>${escXml(msg)}</Message></Error>`);
 
 export async function startMockSeaweed() {
   const buckets = new Map();   // name -> Map(key -> size)

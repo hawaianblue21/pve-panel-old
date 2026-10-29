@@ -585,7 +585,7 @@ A resource that does not belong to the signed-in customer is returned as **404**
 ### Requirements
 
 - Proxmox VE 8 or 9
-- Node.js **22.13+** for a native installation
+- Node.js **22.13+** for a native installation (use the newest patch release of 22 or 24: at least 22.23.4 / 24.22.1 for the October 2026 security fixes)
 - or Docker / Docker Compose (also Portainer or a NAS Docker app)
 - A dedicated Proxmox API user/token
 - Optional: Proxmox SDN for isolated customer networks

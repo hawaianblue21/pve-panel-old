@@ -2,7 +2,9 @@
 # pve-panel: customer panel (3000) + admin interface (3001) in one small image.
 # Pure JavaScript (no native modules), so it builds the same for amd64 and arm64.
 
-FROM node:22-bookworm-slim
+# Pinned to a patch release with the current security fixes (22.23.4: Brotli
+# CVE-2026-111497 and others). Dependabot proposes newer ones as pull requests.
+FROM node:22.23.4-bookworm-slim
 
 # Links the image on ghcr.io to its repository (also set by the CI workflow)
 LABEL org.opencontainers.image.source="https://github.com/hawaianblue21/pve-panel" \

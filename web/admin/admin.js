@@ -1396,7 +1396,7 @@ export function createAdmin({ root, nav = null, api, toast, fail, confirmAction,
           </div>
           <label class="inline-select">Default mode
             <select data-panel-mode>
-              ${[['dark', 'Dark (PVE Panel App UI)'], ['light', 'Light'], ['system', 'Follow each device']].map(([v, l]) => `<option value="${v}" ${ap.mode === v ? 'selected' : ''}>${l}</option>`).join('')}
+              ${[['system', 'System colors (follow each device)'], ['dark', 'Always dark'], ['light', 'Always light']].map(([v, l]) => `<option value="${v}" ${ap.mode === v ? 'selected' : ''}>${l}</option>`).join('')}
             </select></label>
           <label class="check"><input type="checkbox" data-allow-personal ${ap.allowPersonal ? 'checked' : ''}>
             <span>Users may choose their own scheme and light/dark mode <span class="muted">(Account → Appearance; only for themselves)</span></span></label>

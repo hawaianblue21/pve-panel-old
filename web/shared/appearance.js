@@ -33,8 +33,8 @@ export async function renderAppearance(container) {
             <span class="muted small">${esc(sc.description)}</span>
           </button>`).join('')}
       </div>
-      <div class="segmented" role="radiogroup" aria-label="Light or dark">
-        ${[['panel', `Panel default (${{ dark: 'dark', light: 'light', system: 'device' }[a.panelMode] ?? 'device'})`], ['system', 'Follow device'], ['light', 'Light'], ['dark', 'Dark']].map(([m, label]) => `
+      <div class="segmented" role="radiogroup" aria-label="Light or dark">  <!-- System colors on = follows the device; Light or Dark = off -->
+        ${[['panel', `Panel default (${{ dark: 'dark', light: 'light', system: 'system colors' }[a.panelMode] ?? 'system colors'})`], ['system', 'System colors'], ['light', 'Light'], ['dark', 'Dark']].map(([m, label]) => `
           <button type="button" role="radio" data-my-mode="${m}" aria-checked="${a.mode === m}">${label}</button>`).join('')}
       </div>
     </section>`;

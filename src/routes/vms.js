@@ -1,4 +1,5 @@
 import { poolOfUser, datacentersFor } from '../pools.js';
+import { liveSettings, vcpusOf, maxCoresOf, hotplugReady } from '../liveresize.js';
 import { profilesForUser, gpusOfServer } from '../gpu.js';
 import { s3Enabled } from '../seaweedfs.js';
 import { db, audit } from '../db.js';
@@ -465,7 +466,9 @@ export default async function vmRoutes(app) {
       const p = Object.fromEntries(pending.filter((e) => e.pending !== undefined).map((e) => [e.key, e.pending]));
       if (p.cores !== undefined || p.memory !== undefined || p.sockets !== undefined) {
         pendingSize = {
-          cores: (Number(p.cores ?? cfg.cores) || 1) * (Number(p.sockets ?? cfg.sockets) || 1),
+          cores: p.cores !== undefined || p.sockets !== undefined
+            ? (Number(p.cores ?? cfg.cores) || 1) * (Number(p.sockets ?? cfg.sockets) || 1)
+            : vcpusOf(cfg),
           memoryMb: Number(p.memory ?? cfg.memory) || null,
         };
       }
@@ -480,10 +483,14 @@ export default async function vmRoutes(app) {
       diskGb: (() => { const k = bootDiskKey(cfg); return k ? Math.ceil(diskSizeGb(cfg[k])) : null; })(),
       // What the server runs with now (config would show pending values)
       memoryMb: status.status === 'running' && status.maxmem ? Math.round(status.maxmem / 2 ** 20) : (Number(cfg.memory) || null),
-      cores: status.status === 'running' && status.cpus ? status.cpus : (Number(cfg.cores) || 1) * (Number(cfg.sockets) || 1),
+      cores: status.status === 'running' && status.cpus ? status.cpus : vcpusOf(cfg),
       ipconfig: cfg.ipconfig0 ?? cfg.net0 ?? null,
       ips,
       pendingSize,
+      // CPU and memory can grow while the server runs (hotplug); `maxCores` is the ceiling
+      liveResize: guest.type === 'qemu' && hotplugReady(cfg) && liveSettings().enabled
+        ? { supported: true, maxCores: maxCoresOf(cfg), maxMemoryMb: liveSettings().maxMemoryGb * 1024 }
+        : { supported: false },
       resizable: !!row.created_by_customer && !row.plan_id,
       upgradable: !!row.created_by_customer && !!row.plan_id,
       gpus: gpusOfServer(row.vmid).map(({ slot, name, mode, vramGb }) => ({ slot, name, mode, vramGb })),

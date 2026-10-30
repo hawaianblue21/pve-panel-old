@@ -13,6 +13,9 @@ export const SCHEMES = [
   { id: 'ember', name: 'Ember', description: 'Warm orange on dark brown', accent: '#b9400f', side: '#2a1c15' },
   { id: 'orchid', name: 'Orchid', description: 'Violet on aubergine', accent: '#7339e0', side: '#221836' },
   { id: 'graphite', name: 'Graphite', description: 'Neutral graphite with teal', accent: '#0d7068', side: '#202427' },
+  { id: 'ocean', name: 'Ocean', description: 'Clear sky blue on deep sea', accent: '#0b6fa4', side: '#0f2230' },
+  { id: 'rose', name: 'Rose', description: 'Raspberry pink on dark plum', accent: '#b3245c', side: '#2a1520' },
+  { id: 'sand', name: 'Sand', description: 'Warm gold on dark umber', accent: '#8a5a00', side: '#2b2416' },
 ];
 export const DEFAULT_SCHEME = 'harbor';
 const KEY = 'appearance';

@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import { test, expect } from '@playwright/test';
 
 const audit = fs.readFileSync(new URL('../support/contrast-audit.js', import.meta.url), 'utf8');
-const SCHEMES = ['harbor', 'forest', 'ember', 'orchid', 'graphite'];
+const SCHEMES = ['harbor', 'forest', 'ember', 'orchid', 'graphite', 'ocean', 'rose', 'sand'];
 const C = () => process.env.E2E_CUSTOMER_URL;
 const A = () => process.env.E2E_ADMIN_URL;
 // All browser tests share one IP and sign-in allows 10 per minute: wait out a 429.

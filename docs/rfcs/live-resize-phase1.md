@@ -1,6 +1,6 @@
 # RFC: Live resize vCPU dan RAM (Fase 1)
 
-Status: Draft untuk review. Klasifikasi: RESTRICTED. Target versi: 1.14.0.
+Status: Diimplementasikan di 1.14.0 (lihat `src/liveresize.js`). Penyimpangan dari draft: scale-down pada server running ditolak dengan 409 (bukan pending), karena `vcpus`/`memory` pada VM hotplug berlaku langsung dan tidak bisa ditunda; melebihi ceiling saat running juga 409; kolom `live_max_cores` tidak dibuat (ceiling dibaca dari `cores` di config). Klasifikasi: RESTRICTED. Target versi: 1.14.0.
 
 ## 1. Tujuan dan lingkup
 

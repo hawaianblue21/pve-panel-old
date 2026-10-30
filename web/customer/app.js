@@ -1310,6 +1310,9 @@ function renderResize(vm) {
     memoryMb: vm.pendingSize?.memoryMb ?? vm.memoryMb,
     diskGb: vm.diskGb,
   };
+  // Live resize: a running server can grow right away, up to its ceilings, but not shrink
+  const running = vm.status === 'running';
+  const live = running && vm.liveResize?.supported ? vm.liveResize : null;
   const max = {
     cores: limits.cores - usage.cores + cur.cores,
     memoryMb: limits.memoryMb - usage.memoryMb + cur.memoryMb,
@@ -1317,8 +1320,9 @@ function renderResize(vm) {
   };
   const minMem = windows ? 2048 : 512;
   const steps = [...new Set([...MEMORY_STEPS_MB, cur.memoryMb])].sort((a, b) => a - b)
-    .filter((m) => m >= Math.min(minMem, cur.memoryMb) && m <= Math.max(max.memoryMb, cur.memoryMb));
-  const running = vm.status === 'running';
+    .filter((m) => m >= Math.min(minMem, cur.memoryMb) && m <= Math.max(max.memoryMb, cur.memoryMb))
+    .filter((m) => !live || (m >= cur.memoryMb && m <= Math.max(live.maxMemoryMb, cur.memoryMb)));
+  if (live) max.cores = Math.min(max.cores, live.maxCores);
 
   $('#detail').innerHTML = `
     <div class="detail-inner">
@@ -1332,7 +1336,8 @@ function renderResize(vm) {
           <legend>New size</legend>
           <div class="grid-3">
             <label>CPU cores
-              <input name="cores" type="number" min="1" max="${Math.max(max.cores, cur.cores)}" value="${cur.cores}" required>
+              <input name="cores" type="number" min="${live ? cur.cores : 1}" max="${Math.max(max.cores, cur.cores)}" value="${cur.cores}" required>
+              ${live ? '<span class="hint">Applies immediately. Can only grow while running.</span>' : ''}
             </label>
             <label>Memory
               <select name="memoryMb">
@@ -1345,7 +1350,8 @@ function renderResize(vm) {
               <span class="hint">Can only grow; this can't be undone.</span>
             </label>
           </div>
-          ${running ? `
+          ${live ? '<p class="muted small">CPU and memory changes apply immediately, without a restart. To make them smaller, stop the server first.</p>'
+            : running ? `
             <label class="check">
               <input type="checkbox" name="restart" checked>
               <span>Restart the server now
@@ -1386,8 +1392,12 @@ async function submitResize(form) {
   try {
     const vmid = state.detail.vmid;
     const r = await api(`/api/vms/${vmid}/resize`, { method: 'POST', body });
-    const notes = [r.restartTask ? 'Restarting to apply the new size.' : r.pendingRestart ? 'CPU and memory take effect at the next restart from the panel.' : 'Size changed.'];
+    const notes = [r.live?.applied ? 'The new CPU and memory are active now.' : r.restartTask ? 'Restarting to apply the new size.' : r.pendingRestart ? 'CPU and memory take effect at the next restart from the panel.' : 'Size changed.'];
     let kind;
+    if (r.live?.warnings?.includes('guest-did-not-online-cpus')) {
+      notes.push("The server hasn't brought the new CPUs online yet. If it stays that way, restart it.");
+      kind = 'warn';
+    }
     if (r.windowsDisk === 'extended') notes.push('Drive C: was extended.');
     if (r.windowsDisk === 'blocked') { notes.push("Windows can't extend drive C: because another partition (usually Recovery) sits behind it. Extend it in Disk Management after moving that partition."); kind = 'warn'; }
     if (r.windowsDisk === 'not-running' || r.windowsDisk === 'failed') { notes.push('Extend drive C: in Windows Disk Management to use the new space.'); kind = 'warn'; }

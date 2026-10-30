@@ -15,6 +15,7 @@
 
 import { db, audit } from './db.js';
 import { config } from './config.js';
+import { vcpusOf } from './liveresize.js';
 import { pve, clusterGuests, guestPath, waitTask, bootDiskKey, diskSizeGb, serial, invalidateGuestCache, rawDownload } from './pve.js';
 import { TZ } from './clock.js';
 import { backupSettings, pbsForCluster, policyOfServer, listPolicies } from './backups.js';
@@ -232,7 +233,7 @@ export async function restoreAsNew(req, row, id, { hostname }) {
   if (!/^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?$/.test(String(hostname ?? ''))) throw fail(400, 'Name: lowercase letters, digits and dashes');
   const { p, point } = await pointOf(row, id);
   const cfg = await p.api.get(`${guestPath(p.guest)}/config`);
-  const spec = { cores: Number(cfg.cores ?? 1) * Number(cfg.sockets ?? 1), memoryMb: Number(cfg.memory ?? 1024), diskGb: Math.ceil(diskSizeGb(cfg[bootDiskKey(cfg)] ?? '')) };
+  const spec = { cores: vcpusOf(cfg), memoryMb: Number(cfg.memory ?? 1024), diskGb: Math.ceil(diskSizeGb(cfg[bootDiskKey(cfg)] ?? '')) };
   const limits = limitsOf(account);
   const usage = await usageOf(account.id);
   const over = [];

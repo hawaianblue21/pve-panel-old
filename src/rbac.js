@@ -117,6 +117,8 @@ const ROUTES = {
   'PUT /api/admin/settings/email': 'settings.write',
   'DELETE /api/admin/settings/email': 'settings.write',
   'POST /api/admin/settings/email/test': 'settings.write',
+  'GET /api/admin/settings/live-resize': 'settings.read',
+  'PUT /api/admin/settings/live-resize': 'settings.write',
   'GET /api/admin/settings/appearance': 'settings.read',
   'PUT /api/admin/settings/appearance': 'settings.write',
   'GET /api/admin/settings/branding': 'settings.read',

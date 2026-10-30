@@ -15,7 +15,7 @@ test('default is Harbor in dark mode; five schemes are offered', async () => {
   assert.equal((await stack.customer().get('/api/brand')).json.scheme, 'harbor');
   assert.equal((await stack.customer().get('/api/brand')).json.mode, 'dark');
   const r = (await admin.get('/api/admin/settings/appearance')).json;
-  assert.deepEqual(r.schemes.map((s) => s.id), ['harbor', 'forest', 'ember', 'orchid', 'graphite']);
+  assert.deepEqual(r.schemes.map((s) => s.id), ['harbor', 'forest', 'ember', 'orchid', 'graphite', 'ocean', 'rose', 'sand']);
 });
 
 test('a scheme set by the admin reaches both portals (also before sign-in)', async () => {
@@ -42,7 +42,7 @@ test('unknown schemes are refused; customers cannot change it', async () => {
 
 test('every scheme has CSS for light and dark mode', async () => {
   const css = (await stack.customer().get('/shared/styles.css')).text;
-  for (const id of ['forest', 'ember', 'orchid', 'graphite']) {
+  for (const id of ['forest', 'ember', 'orchid', 'graphite', 'ocean', 'rose', 'sand']) {
     // light, dark when the device is dark (unless light was chosen), and dark when chosen
     assert.equal(css.split(`:root[data-scheme="${id}"] {`).length - 1, 1, `${id}: light block`);
     assert.equal(css.split(`:root[data-scheme="${id}"]:not([data-mode="light"]) {`).length - 1, 1, `${id}: device dark block`);

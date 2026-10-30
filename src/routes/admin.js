@@ -468,9 +468,9 @@ export default async function adminRoutes(app) {
       },
     },
   }, async (req) => {
-    const saved = saveLiveSettings(req.body);
+    saveLiveSettings(req.body);
     audit(req, null, 'admin_live_resize', req.body);
-    return saved;
+    return liveSettings(); // read back from storage, not echoed from the request
   });
 
   // ---- Settings: branding (white-label) -------------------------------------------

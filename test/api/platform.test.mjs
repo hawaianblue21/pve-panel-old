@@ -23,7 +23,7 @@ test('personal appearance: own scheme and light/dark mode, only for this account
   assert.equal(a.allowed, true);
   assert.equal(a.scheme, null);
   assert.equal(a.mode, 'panel', 'the panel default until the user chooses');
-  assert.equal(a.panelMode, 'dark');
+  assert.equal(a.panelMode, 'system');
   assert.equal(a.effective, 'harbor');
 
   const set = await rina.put('/api/account/appearance', { scheme: 'orchid', mode: 'dark' });

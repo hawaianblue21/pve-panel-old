@@ -136,7 +136,7 @@ PVE Panel was built with substantial help from an AI assistant (**Claude by Anth
 - Launch an integrated browser console
 - Create new servers from administrator-approved templates
 - Reinstall self-created servers from a template (same name, size and network address)
-- Resize self-created servers within their plan (CPU, memory, disk)
+- Resize self-created servers within their plan (CPU, memory, disk); with **live resize** (when the administrator enables it) a running Linux server gets more CPU and memory immediately, without a restart
 - Install Windows updates with one click (optional snapshot first, automatic restarts)
 - Install Linux package updates (apt / dnf) the same way: security only or everything, restart reminder after a new kernel
 - Sign in with Google, Microsoft (work or school accounts) or GitHub, and link or unlink them under Account
@@ -1667,7 +1667,7 @@ Both portals follow the **PVE Panel App UI**: midnight navy surfaces, a grouped 
 Customers & billing, Support, System; customers: Compute, Storage & network, Billing, Support), IBM Plex Sans for text,
 Space Grotesk for headings and figures, JetBrains Mono for labels and data.
 
-Five color schemes — **Harbor** (default, the App UI's signal blue), **Forest**, **Ember**, **Orchid**, **Graphite** — each with a light and dark variant. Set in **Settings → Appearance** for everyone: admin interface, customer portal, sign-in pages and emails. The **default mode** for everyone is **dark** (the App UI); the owner can switch it to light or to each device's setting.
+Eight color schemes — **Harbor** (default, the App UI's signal blue), **Forest**, **Ember**, **Orchid**, **Graphite**, **Ocean**, **Rose**, **Sand** — each with a light and dark variant. Set in **Settings → Appearance** for everyone: admin interface, customer portal, sign-in pages and emails. The **default mode** for everyone is **System colors**: light or dark follows each device's setting. The owner can force dark or light for everyone, and users can choose their own (when allowed).
 
 Users can also pick their **own** scheme and mode (**panel default, device, light or dark**) under **Account → Appearance** (stored with
 their account, so it follows them to other devices). The owner can switch this off; everyone then sees the panel's scheme and mode.
@@ -2006,7 +2006,7 @@ with what real Proxmox environments show.
 
 **Already delivered** (so no longer on this list): backups on Proxmox Backup Server (policies, backup window, restore as a
 new server or over the server, protected backups, file download, encryption, retention add-ons), several Proxmox
-clusters, fleet updates and rollouts, public IPs (IPAM) and OS template import.
+clusters, fleet updates and rollouts, public IPs (IPAM), OS template import and live resize of vCPU and memory (Linux).
 
 | # | Idea | What it means |
 |---|---|---|
@@ -2020,8 +2020,6 @@ clusters, fleet updates and rollouts, public IPs (IPAM) and OS template import.
 
 **Under evaluation (not scheduled)**
 
-- *Live resize* of vCPU and memory through Proxmox hotplug: Linux guests first, switched on by an administrator per
-  template, with a fallback to the restart that is needed today.
 - *Intel or AMD at provisioning*: a CPU class per node, a choice for the customer, placement on matching nodes. High
   availability after a hardware failure is configured in Proxmox (strict node-affinity per vendor); live migration
   between Intel and AMD hosts is not guaranteed to work.

@@ -6,6 +6,7 @@ import { tailscaleOverview } from '../tailscale.js';
 import { SCHEMES, currentScheme, setScheme, personalAllowed, setAllowPersonal, defaultMode, setDefaultMode, PANEL_MODES } from '../appearance.js';
 import { updatesEnabled, linuxUpdatesEnabled, setUpdatesEnabled } from '../winupdate.js';
 import * as sso from '../sso.js';
+import { liveSettings, saveLiveSettings } from '../liveresize.js';
 import { branding, saveBranding, saveAsset, removeAsset } from '../branding.js';
 import { activity, ACTOR_KEYS, CATEGORY_KEYS } from '../activity.js';
 import * as totp from '../totp.js';
@@ -457,6 +458,21 @@ export default async function adminRoutes(app) {
     return appearanceNow();
   });
 
+  // ---- Settings: live resize (CPU and memory hotplug) --------------------------------
+  app.get('/api/admin/settings/live-resize', async () => liveSettings());
+  app.put('/api/admin/settings/live-resize', {
+    schema: {
+      body: {
+        type: 'object', additionalProperties: false, minProperties: 1,
+        properties: { enabled: { type: 'boolean' }, maxVcpus: { type: 'integer' }, maxMemoryGb: { type: 'integer' } },
+      },
+    },
+  }, async (req) => {
+    saveLiveSettings(req.body);
+    audit(req, null, 'admin_live_resize', req.body);
+    return liveSettings(); // read back from storage, not echoed from the request
+  });
+
   // ---- Settings: branding (white-label) -------------------------------------------
   app.get('/api/admin/settings/branding', { config: { rateLimit: { max: 120, timeWindow: '1 minute' } } }, async () => branding());
   app.put('/api/admin/settings/branding', {
@@ -717,6 +733,7 @@ export default async function adminRoutes(app) {
         offered: !!row, label: row?.label ?? '', storage: row?.storage ?? '',
         ciUser: row?.ci_user ?? '', ipconfig: row?.ipconfig ?? 'ip=dhcp',
         setup: row?.setup ?? (/^win/.test(g.name ?? '') ? 'windows' : 'cloudinit'),
+        liveResize: !!row?.live_resize,
         imported: importOfTemplate(Number(g.vmid)),
       };
     }).sort((a, b) => a.vmid - b.vmid);
@@ -735,20 +752,22 @@ export default async function adminRoutes(app) {
           ciUser: { type: 'string', maxLength: 32 },
           ipconfig: { type: 'string', maxLength: 200 },
           setup: { type: 'string', enum: ['cloudinit', 'windows'] },
+          liveResize: { type: 'boolean' },
         },
       },
     },
   }, async (req) => {
     const vmid = Number(req.params.vmid);
     await locateTemplate(vmid);
-    const { label, storage, ciUser, ipconfig, setup = 'cloudinit' } = req.body;
+    const { label, storage, ciUser, ipconfig, setup = 'cloudinit', liveResize = false } = req.body;
     db.prepare(`
-      INSERT INTO templates (vmid, label, storage, ci_user, ipconfig, setup) VALUES (?, ?, ?, ?, ?, ?)
+      INSERT INTO templates (vmid, label, storage, ci_user, ipconfig, setup, live_resize) VALUES (?, ?, ?, ?, ?, ?, ?)
       ON CONFLICT(vmid) DO UPDATE SET label = excluded.label, storage = excluded.storage,
-        ci_user = excluded.ci_user, ipconfig = excluded.ipconfig, setup = excluded.setup
+        ci_user = excluded.ci_user, ipconfig = excluded.ipconfig, setup = excluded.setup,
+        live_resize = excluded.live_resize
     `).run(vmid, label.trim(), storage?.trim() || null, ciUser?.trim() || null,
-      ipconfig?.trim() || 'ip=dhcp', setup);
-    audit(req, vmid, 'admin_template_offer', { label });
+      ipconfig?.trim() || 'ip=dhcp', setup, setup === 'windows' ? 0 : +liveResize);
+    audit(req, vmid, 'admin_template_offer', { label, liveResize });
     return { vmid };
   });
 

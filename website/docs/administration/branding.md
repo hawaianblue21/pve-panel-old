@@ -18,7 +18,7 @@ policy. Make sure you're allowed to use the images you put there.
 **Settings → Appearance** sets the color scheme for **everyone**: the admin interface, the
 customer portal, both sign-in pages and the emails the panel sends.
 
-![The five color schemes, and Orchid in dark mode](/color-schemes.png)
+![The color schemes, and Orchid in dark mode](/color-schemes.png)
 
 | Scheme | Look |
 |---|---|
@@ -27,6 +27,9 @@ customer portal, both sign-in pages and the emails the panel sends.
 | **Ember** | warm orange on dark brown |
 | **Orchid** | violet on aubergine |
 | **Graphite** | neutral graphite with teal |
+| **Ocean** | clear sky blue on deep sea |
+| **Rose** | raspberry pink on dark plum |
+| **Sand** | warm gold on dark umber |
 
 ![Appearance settings](/appearance-settings.png)
 
@@ -37,7 +40,7 @@ customer portal, both sign-in pages and the emails the panel sends.
 - All text reaches at least **4.5:1 contrast** (WCAG AA; 3:1 for large text) in every scheme
   and mode. This is **measured on the rendered pages** by an automated browser test — every
   visible text, including form fields and placeholders, on the customer and admin pages, in
-  all five schemes, light and dark — so a scheme can't ship with unreadable text.
+  all eight schemes, light and dark — so a scheme can't ship with unreadable text.
 - Charts use two clearly different colors in every scheme (e.g. green and amber in *Forest*).
 - Status colors — green *running*, orange warnings, red for dangerous actions — are the same in
   every scheme, so they always mean the same thing.

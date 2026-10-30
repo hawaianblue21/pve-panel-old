@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import { test, expect } from '@playwright/test';
 
 const audit = fs.readFileSync(new URL('../support/contrast-audit.js', import.meta.url), 'utf8');
-const SCHEMES = ['harbor', 'forest', 'ember', 'orchid', 'graphite'];
+const SCHEMES = ['harbor', 'forest', 'ember', 'orchid', 'graphite', 'ocean', 'rose', 'sand'];
 const C = () => process.env.E2E_CUSTOMER_URL;
 const A = () => process.env.E2E_ADMIN_URL;
 // All browser tests share one IP and sign-in allows 10 per minute: wait out a 429.
@@ -32,7 +32,7 @@ for (const mode of ['light', 'dark']) {
     };
     try {
       for (const scheme of SCHEMES) {
-        // the panel default is dark; follow the device here so both modes are measured
+        // the panel default follows the device; set it explicitly so both modes are measured
         const r = await admin.request.put(`${A()}/api/admin/settings/appearance`, { data: { scheme, mode: 'system' } });
         expect(r.ok()).toBeTruthy();
 

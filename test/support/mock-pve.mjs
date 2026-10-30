@@ -425,9 +425,14 @@ export async function startMockPve({ port = 0, second = false } = {}) {
       if (b.delete) { for (const k of b.delete.split(',').map((x) => x.trim())) diskDelete(vm, k); delete b.delete; }
       diskAssign(vm, b);
       const hot = vm.status === 'running';
-      for (const k of ['cores', 'memory', 'sockets']) if (b[k] !== undefined && hot && String(vm.cfg[k] ?? '') !== String(b[k])) (vm.pending ??= {})[k] = b[k];
+      // CPU and memory hotplug (numa + hotplug cpu,memory): vcpus and memory apply on the fly
+      const hp = String(b.hotplug ?? vm.cfg.hotplug ?? '').split(',');
+      const plug = hot && Number(b.numa ?? vm.cfg.numa) === 1 && hp.includes('cpu') && hp.includes('memory');
+      if (plug && b.vcpus !== undefined && Number(b.vcpus) > Number(b.cores ?? vm.cfg.cores)) return send(res, null, 500, 'vcpus: value must not exceed cores');
+      for (const k of ['cores', 'memory', 'sockets']) if (b[k] !== undefined && hot && String(vm.cfg[k] ?? '') !== String(b[k]) && !(plug && k === 'memory')) (vm.pending ??= {})[k] = b[k];
       Object.assign(vm.cfg, b);
-      if (!hot) { if (b.cores) vm.maxcpu = Number(b.cores); if (b.memory) vm.maxmem = Number(b.memory)*2**20; }
+      if (plug) { if (b.vcpus !== undefined) vm.maxcpu = Number(b.vcpus); if (b.memory !== undefined) vm.maxmem = Number(b.memory)*2**20; }
+      if (!hot) { if (b.vcpus || b.cores) vm.maxcpu = Number(b.vcpus || b.cores); if (b.memory) vm.maxmem = Number(b.memory)*2**20; }
       return send(res, null); }
     if (rest === '/pending' && req.method === 'GET') {
       return send(res, Object.keys(vm.cfg).map((k) => ({ key: k, value: vm.pending?.[k] !== undefined ? undefined : vm.cfg[k], ...(vm.pending?.[k] !== undefined ? { value: String(k === 'cores' ? vm.maxcpu : Math.round(vm.maxmem / 2**20)), pending: vm.pending[k] } : {}) })));
@@ -483,6 +488,9 @@ export async function startMockPve({ port = 0, second = false } = {}) {
       if (req.method !== 'GET') log('FW', vmid, req.method, rest, JSON.stringify(b)); return send(res, req.method==='GET' ? [] : null); }
     if (rest === '/template' && req.method === 'POST') { log('TEMPLATE', vmid); if (vm.status !== 'stopped') return send(res, null, 500, 'VM is running'); return send(res, task('qmtemplate', vmid, 400, () => { vm.template = 1; })); }
     if (rest === '/agent/ping') { if ((vm.noAgent || vms.get(vm.origin)?.noAgent)) return send(res,null,500,'QEMU guest agent is not running'); if (vm.status==='running' && Date.now()-(started.get(vmid) ?? 0) > 2000) return send(res,{}); return send(res,null,500,'QEMU guest agent is not running'); }
+    if (rest === '/agent/get-vcpus') { if (vm.status !== 'running') return send(res, null, 500, 'QEMU guest agent is not running');
+      // vm.guestCpus: how many CPUs the guest really onlined (default: all that Proxmox plugged)
+      const n = vm.guestCpus ?? vm.maxcpu; return send(res, { result: Array.from({ length: Math.max(n, 1) }, (_, i) => ({ 'logical-id': i, online: true, 'can-offline': i > 0 })) }); }
     if (rest === '/agent/get-osinfo') { if (vm.status !== 'running') return send(res, null, 500, 'QEMU guest agent is not running');
       const deb = /debian/i.test(vms.get(vm.origin)?.name ?? vm.name ?? '');
       return send(res, { result: deb ? { id: 'debian', name: 'Debian GNU/Linux', 'pretty-name': 'Debian GNU/Linux 12 (bookworm)', 'version-id': '12' } : { id: 'ubuntu', name: 'Ubuntu', 'pretty-name': 'Ubuntu 24.04.1 LTS', 'version-id': '24.04' } }); }

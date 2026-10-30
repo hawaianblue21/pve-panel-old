@@ -69,6 +69,7 @@ const ACTION_LABELS = {
   admin_expiry_settings: 'Changed expiry settings',
   admin_expiry_run: 'Ran expiry check',
   admin_appearance: 'Changed the color scheme',
+  admin_live_resize: 'Changed the live resize settings',
   admin_winupdates: 'Changed Windows update setting',
   winupdate_started: 'Started Windows updates',
   winupdate_finished: 'Windows updates finished',
@@ -302,11 +303,11 @@ export function createAdmin({ root, nav = null, api, toast, fail, confirmAction,
         [st.users, st.email] = await Promise.all([api('/api/admin/users'), api('/api/admin/settings/email')]);
         if (!quiet) setTimeout(watchDeletions);
       } else if (st.tab === 'settings') {
-        [st.email, st.expiry, st.appearance, st.winupdates, st.sso, st.branding, st.zammad, st.ai, st.billing] = await Promise.all([
+        [st.email, st.expiry, st.appearance, st.winupdates, st.sso, st.branding, st.zammad, st.ai, st.billing, st.liveResize] = await Promise.all([
           api('/api/admin/settings/email'), api('/api/admin/settings/expiry'), api('/api/admin/settings/appearance'),
           api('/api/admin/settings/winupdates'), api('/api/admin/settings/sso'), api('/api/admin/settings/branding'),
           api('/api/admin/settings/zammad').catch(() => null), api('/api/admin/settings/ai').catch(() => null),
-          api('/api/admin/settings/billing').catch(() => null),
+          api('/api/admin/settings/billing').catch(() => null), api('/api/admin/settings/live-resize').catch(() => null),
         ]);
       } else if (st.tab === 'about') {
         st.about = await api(`/api/admin/about${st.refreshAbout ? '?refresh=1' : ''}`);
@@ -991,7 +992,7 @@ export function createAdmin({ root, nav = null, api, toast, fail, confirmAction,
         <table class="table">
           <thead><tr>
             <th>ID</th><th>Template in Proxmox</th><th>Offered</th><th>Name shown to customers</th>
-            <th>Setup</th><th>Target storage</th><th>User</th><th>Network (cloud-init)</th><th><span class="sr-only">Save</span></th>
+            <th>Setup</th><th>Live resize</th><th>Target storage</th><th>User</th><th>Network (cloud-init)</th><th><span class="sr-only">Save</span></th>
           </tr></thead>
           <tbody>
             ${st.templates.map((t) => `
@@ -1006,6 +1007,7 @@ export function createAdmin({ root, nav = null, api, toast, fail, confirmAction,
                     <option value="windows" ${t.setup === 'windows' ? 'selected' : ''}>Guest agent (Windows)</option>
                   </select>
                 </td>
+                <td><input type="checkbox" data-f="liveResize" ${t.liveResize ? 'checked' : ''} ${t.setup === 'windows' ? 'disabled' : ''} aria-label="Live resize for template ${t.vmid}"></td>
                 <td>
                   <select data-f="storage">
                     <option value="">Same as template</option>
@@ -1024,7 +1026,10 @@ export function createAdmin({ root, nav = null, api, toast, fail, confirmAction,
         <strong>Cloud-init:</strong> the customer chooses the user name (User is only the suggestion); Network is the
         <span class="mono">ipconfig0</span> value, e.g. <span class="mono">ip=dhcp</span>.
         <strong>Guest agent (Windows):</strong> the template must be sysprep'd with the QEMU guest agent installed and enabled;
-        the panel sets the password of User (default Administrator) and the computer name.</p>
+        the panel sets the password of User (default Administrator) and the computer name.
+        <strong>Live resize:</strong> servers from this template can get more CPU and memory without a restart
+        (Settings → Live resize must be on). The image needs kernel 5.15 or newer, the QEMU guest agent and the udev rule
+        <span class="mono">/lib/udev/rules.d/80-hotplug-cpu.rules</span>; Linux only.</p>
       </fieldset>`;
     imports.render();
   }
@@ -1051,12 +1056,13 @@ export function createAdmin({ root, nav = null, api, toast, fail, confirmAction,
             ciUser: field('ciUser').value.trim(),
             ipconfig: field('ipconfig').value.trim(),
             setup: field('setup').value,
+            liveResize: field('setup').value !== 'windows' && field('liveResize').checked,
           },
         });
         toast(`${label} is offered to customers`);
       }
       const t = st.templates.find((x) => x.vmid === vmid);
-      Object.assign(t, { offered, label });
+      Object.assign(t, { offered, label, liveResize: offered && field('setup').value !== 'windows' && field('liveResize').checked });
     } catch (err) { fail(err); }
   }
 
@@ -1316,6 +1322,26 @@ export function createAdmin({ root, nav = null, api, toast, fail, confirmAction,
     const br = st.branding;
     root.querySelector('#admin-body').innerHTML = `
       <div class="settings">
+        ${st.liveResize ? `
+        <section class="security-card settings-card">
+          <div class="settings-head">
+            <h2 class="twofa-title">Live resize</h2>
+            <p class="muted">Let customers add CPU and memory to a running Linux server without a restart. It applies to servers created
+              from templates marked <em>Live resize</em> (Templates tab). Only growing is live; reducing needs the server stopped.</p>
+          </div>
+          <form id="liveresize-form" class="email-form" novalidate>
+            <label class="check"><input type="checkbox" name="enabled" ${st.liveResize.enabled ? 'checked' : ''}>
+              <span>Enable live resize
+                <span class="muted">Off: new servers are built as before and existing live servers must be stopped to change CPU or memory.</span></span></label>
+            <div class="grid-2">
+              <label>Maximum vCPUs per server <input name="maxVcpus" type="number" min="1" max="128" value="${st.liveResize.maxVcpus}" required>
+                <span class="hint">The ceiling a new server is built with. Raising it later needs the server stopped.</span></label>
+              <label>Maximum memory per server (GB) <input name="maxMemoryGb" type="number" min="1" max="1024" value="${st.liveResize.maxMemoryGb}" required>
+                <span class="hint">Above 64 GB each Proxmox host needs <span class="mono">vhost max_mem_regions=128</span>.</span></label>
+            </div>
+            <div class="row"><button class="btn primary">Save</button></div>
+          </form>
+        </section>` : ''}
         ${br ? `
         <section class="security-card settings-card">
           <div class="settings-head">
@@ -1370,7 +1396,7 @@ export function createAdmin({ root, nav = null, api, toast, fail, confirmAction,
           </div>
           <label class="inline-select">Default mode
             <select data-panel-mode>
-              ${[['dark', 'Dark (PVE Panel App UI)'], ['light', 'Light'], ['system', 'Follow each device']].map(([v, l]) => `<option value="${v}" ${ap.mode === v ? 'selected' : ''}>${l}</option>`).join('')}
+              ${[['system', 'System colors (follow each device)'], ['dark', 'Always dark'], ['light', 'Always light']].map(([v, l]) => `<option value="${v}" ${ap.mode === v ? 'selected' : ''}>${l}</option>`).join('')}
             </select></label>
           <label class="check"><input type="checkbox" data-allow-personal ${ap.allowPersonal ? 'checked' : ''}>
             <span>Users may choose their own scheme and light/dark mode <span class="muted">(Account → Appearance; only for themselves)</span></span></label>
@@ -1578,6 +1604,18 @@ export function createAdmin({ root, nav = null, api, toast, fail, confirmAction,
       try {
         st.zammad = await api('/api/admin/settings/zammad', { method: 'PUT', body });
         toast(st.zammad.enabled ? 'Zammad connected' : 'Zammad settings saved');
+        renderSettings();
+      } catch (err) { fail(err); }
+      return;
+    }
+    if (ev.target.id === 'liveresize-form') {
+      ev.preventDefault();
+      const el = ev.target.elements;
+      try {
+        st.liveResize = await api('/api/admin/settings/live-resize', { method: 'PUT', body: {
+          enabled: el.enabled.checked, maxVcpus: Number(el.maxVcpus.value), maxMemoryGb: Number(el.maxMemoryGb.value),
+        } });
+        toast('Live resize settings saved');
         renderSettings();
       } catch (err) { fail(err); }
       return;

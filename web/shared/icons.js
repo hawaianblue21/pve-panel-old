@@ -69,8 +69,8 @@ const PERSONAL_KEY = 'pve-panel.personal';
 const MODE_KEY = 'pve-panel.mode';
 let personal = null;   // { scheme, mode } of the signed-in user, or null
 let panelScheme = null;
-let panelMode = 'dark'; // the owner's default for everyone: dark, light or system
-try { panelMode = localStorage.getItem(MODE_KEY) || 'dark'; } catch { /* storage unavailable */ }
+let panelMode = 'system'; // the owner's default for everyone: system (the device's), dark or light
+try { panelMode = localStorage.getItem(MODE_KEY) || 'system'; } catch { /* storage unavailable */ }
 const html = document.documentElement;
 
 /** mode: the user's own ('light', 'dark', 'system') or 'panel'/none for the panel default. */

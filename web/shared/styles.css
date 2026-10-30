@@ -996,6 +996,135 @@ dialog p { margin: 0 0 20px; }
   --signal-soft: #5ee6d3;
 }
 
+:root[data-scheme="ocean"] {
+  --chart-b: #b7701a;
+  --ink: #0f2230;
+  --bg: #edf3f7;
+  --surface-2: #f5f9fb;
+  --line: #d5e1e9;
+  --muted: #526776;
+  --signal: #0b6fa4;
+  --side: #0f2230;
+  --side-ink: #e3eef5;
+  --side-muted: #90a9ba;
+  --signal-soft: #6cc6f0;
+}
+@media (prefers-color-scheme: dark) {
+  :root[data-scheme="ocean"]:not([data-mode="light"]) {
+    --chart-b: #f0b04d;
+    --ink: #e3eef5;
+    --bg: #0a1620;
+    --surface: #101f2c;
+    --surface-2: #152838;
+    --line: #223648;
+    --muted: #90a9ba;
+    --signal: #4cb8f0;
+    --signal-ink: #06141d;
+    --side: #08121a;
+    --signal-soft: #6cc6f0;
+  }
+}
+/* chosen dark mode (Account → Appearance), whatever the device says */
+:root[data-scheme="ocean"][data-mode="dark"] {
+  --chart-b: #f0b04d;
+  --ink: #e3eef5;
+  --bg: #0a1620;
+  --surface: #101f2c;
+  --surface-2: #152838;
+  --line: #223648;
+  --muted: #90a9ba;
+  --signal: #4cb8f0;
+  --signal-ink: #06141d;
+  --side: #08121a;
+  --signal-soft: #6cc6f0;
+}
+
+:root[data-scheme="rose"] {
+  --chart-b: #2f7d6b;
+  --ink: #2a1520;
+  --bg: #f7eff2;
+  --surface-2: #fbf5f7;
+  --line: #ebd9e0;
+  --muted: #6e5560;
+  --signal: #b3245c;
+  --side: #2a1520;
+  --side-ink: #f3e3ea;
+  --side-muted: #b392a0;
+  --signal-soft: #ff8fb8;
+}
+@media (prefers-color-scheme: dark) {
+  :root[data-scheme="rose"]:not([data-mode="light"]) {
+    --chart-b: #6fd6bf;
+    --ink: #f3e3ea;
+    --bg: #170d12;
+    --surface: #22141b;
+    --surface-2: #2a1a22;
+    --line: #3b2630;
+    --muted: #b392a0;
+    --signal: #ff7fae;
+    --signal-ink: #1c0a12;
+    --side: #110810;
+    --signal-soft: #ff8fb8;
+  }
+}
+/* chosen dark mode (Account → Appearance), whatever the device says */
+:root[data-scheme="rose"][data-mode="dark"] {
+  --chart-b: #6fd6bf;
+  --ink: #f3e3ea;
+  --bg: #170d12;
+  --surface: #22141b;
+  --surface-2: #2a1a22;
+  --line: #3b2630;
+  --muted: #b392a0;
+  --signal: #ff7fae;
+  --signal-ink: #1c0a12;
+  --side: #110810;
+  --signal-soft: #ff8fb8;
+}
+
+:root[data-scheme="sand"] {
+  --chart-b: #3b6fb0;
+  --ink: #2b2416;
+  --bg: #f5f1e8;
+  --surface-2: #faf7f0;
+  --line: #e5dcc8;
+  --muted: #6a604c;
+  --signal: #8a5a00;
+  --side: #2b2416;
+  --side-ink: #f1ebdc;
+  --side-muted: #b0a68c;
+  --signal-soft: #f0c466;
+}
+@media (prefers-color-scheme: dark) {
+  :root[data-scheme="sand"]:not([data-mode="light"]) {
+    --chart-b: #8ab8f0;
+    --ink: #f1ebdc;
+    --bg: #15110a;
+    --surface: #201a10;
+    --surface-2: #282113;
+    --line: #3a3120;
+    --muted: #b0a68c;
+    --signal: #e8b44a;
+    --signal-ink: #1a1406;
+    --side: #0f0c06;
+    --signal-soft: #f0c466;
+  }
+}
+/* chosen dark mode (Account → Appearance), whatever the device says */
+:root[data-scheme="sand"][data-mode="dark"] {
+  --chart-b: #8ab8f0;
+  --ink: #f1ebdc;
+  --bg: #15110a;
+  --surface: #201a10;
+  --surface-2: #282113;
+  --line: #3a3120;
+  --muted: #b0a68c;
+  --signal: #e8b44a;
+  --signal-ink: #1a1406;
+  --side: #0f0c06;
+  --signal-soft: #f0c466;
+}
+
 /* ---- Administration: access, resource pools, object storage, GPUs ---- */
 .h3 { font-size: 16px; font-weight: 700; margin: 0; }
 .perm-group { border: 1px solid var(--line); border-radius: var(--r-lg); padding: 12px 16px 14px; margin: 0; display: grid; gap: 8px; }

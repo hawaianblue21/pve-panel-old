@@ -7,6 +7,7 @@ import {
 import { ensureNetwork, isolateGuest, nicModel } from './network.js';
 import { setupWindows, windowsPasswordProblem } from './windows.js';
 import { agentExec } from './agent.js';
+import { liveSettings, templateLive, liveParams, vcpusOf, maxCoresOf, hotplugReady, verifyLive } from './liveresize.js';
 import { expiryForNewServer } from './expiry.js';
 import { activeRun } from './winupdate.js';
 import { checkPoolCapacity, placement, datacenterById } from './pools.js';
@@ -62,7 +63,7 @@ export async function usageOf(userId) {
     if (!guest) return;
     try {
       const cfg = await pve.get(`${guestPath(guest)}/config`); // pending values included
-      usage.cores += (Number(cfg.cores) || 1) * (Number(cfg.sockets) || 1);
+      usage.cores += vcpusOf(cfg);
       usage.memoryMb += Number(cfg.memory) || 512;
       usage.diskGb += diskTotalGb(cfg);
     } catch {
@@ -284,7 +285,9 @@ async function finishCreate(actor, node, vmid, cloneUpid, spec, tplRow, net, {
 
     progress('Configuring');
     const cfg = await pve.get(`${path}/config`);
-    const params = { cores: spec.cores, sockets: 1, memory: spec.memoryMb };
+    const params = templateLive(tplRow, windows)
+      ? liveParams(spec.cores, spec.memoryMb)
+      : { cores: spec.cores, sockets: 1, memory: spec.memoryMb };
     if (net) {
       // Customer's VNet, firewall on for isolation. A kept MAC (reinstall) gets
       // the same DHCP address again; otherwise Proxmox assigns a new one.
@@ -381,7 +384,7 @@ export async function reinstallServer(req, row, input) {
     const spec = {
       ...input,
       hostname: old.hostname ?? guest?.name ?? `server-${vmid}`,
-      cores: old.cores ?? (Number(oldCfg.cores) || 1),
+      cores: old.cores ?? vcpusOf(oldCfg),
       memoryMb: old.memoryMb ?? (Number(oldCfg.memory) || 1024),
       diskGb: old.diskGb ?? (oldDisk ? Math.ceil(diskSizeGb(oldCfg[oldDisk])) : 0),
     };
@@ -490,7 +493,7 @@ export async function resizeServer(req, row, { cores, memoryMb, diskGb, restart 
     const windows = /^w/.test(cfg.ostype ?? '');
     const disk = bootDiskKey(cfg);
     const cur = {
-      cores: (Number(cfg.cores) || 1) * (Number(cfg.sockets) || 1),
+      cores: vcpusOf(cfg),
       memoryMb: Number(cfg.memory) || 512,
       diskGb: disk ? Math.ceil(diskSizeGb(cfg[disk])) : 0,
     };
@@ -519,7 +522,30 @@ export async function resizeServer(req, row, { cores, memoryMb, diskGb, restart 
     });
 
     const running = guest.status === 'running';
-    if (cpuMemChanged) {
+    // Servers built for live resize: vcpus and memory change on the fly while running
+    const hotplug = guest.type === 'qemu' && hotplugReady(cfg);
+    let live = null;
+    if (cpuMemChanged && hotplug) {
+      const lr = liveSettings();
+      if (running) {
+        if (!lr.enabled) throw new ProvisionError(409, 'Live resize is switched off. Stop the server to change its CPU or memory.');
+        if (next.cores < cur.cores || next.memoryMb < cur.memoryMb) {
+          throw new ProvisionError(409, 'A running server can only grow. Stop it first to reduce CPU or memory.');
+        }
+        if (next.cores > maxCoresOf(cfg)) {
+          throw new ProvisionError(409, `This server can have at most ${maxCoresOf(cfg)} cores while running. Stop it to go higher.`);
+        }
+        if (next.memoryMb > lr.maxMemoryGb * 1024) {
+          throw new ProvisionError(409, `This server can have at most ${lr.maxMemoryGb} GB of memory while running. Stop it to go higher.`);
+        }
+      }
+    }
+    if (cpuMemChanged && hotplug) {
+      const params = { vcpus: next.cores, memory: next.memoryMb };
+      if (next.cores > maxCoresOf(cfg)) params.cores = next.cores; // stopped: raise the ceiling too
+      await pve.put(`${path}/config`, params);
+      if (running) live = await verifyLive(path, { vcpus: next.cores });
+    } else if (cpuMemChanged) {
       await pve.put(`${path}/config`, { cores: next.cores, sockets: 1, memory: next.memoryMb });
     }
     if (diskChanged) {
@@ -555,15 +581,17 @@ export async function resizeServer(req, row, { cores, memoryMb, diskGb, restart 
     }
 
     let restartTask = null;
-    if (cpuMemChanged && running && restart) {
+    const waitsForRestart = cpuMemChanged && running && !(live?.applied);
+    if (waitsForRestart && restart) {
       restartTask = await pve.post(`${path}/status/reboot`); // a Proxmox restart applies pending changes
       invalidateGuestCache();
     }
-    audit(req, row.vmid, 'server_resized', { before: cur, after: next, restart: !!restartTask });
+    audit(req, row.vmid, 'server_resized', { before: cur, after: next, restart: !!restartTask, live: live ? { applied: live.applied, verified: live.verified, warnings: live.warnings } : undefined });
     return {
       before: cur,
       after: next,
-      pendingRestart: cpuMemChanged && running && !restartTask,
+      pendingRestart: waitsForRestart && !restartTask,
+      live,
       restartTask: typeof restartTask === 'string' ? restartTask : null,
       windowsDisk,
     };

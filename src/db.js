@@ -80,6 +80,8 @@ db.exec(`
 
 // How a template is prepared after cloning: cloud-init (Linux) or guest agent (Windows)
 addColumn('templates', 'setup', "TEXT NOT NULL DEFAULT 'cloudinit'");
+// Servers from this template get CPU and memory hotplug (live resize), if switched on in Settings
+addColumn('templates', 'live_resize', 'INTEGER NOT NULL DEFAULT 0');
 // Human-readable step shown to the customer while a server is being set up
 addColumn('vms', 'progress', 'TEXT');
 

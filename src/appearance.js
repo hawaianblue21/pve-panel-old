@@ -1,7 +1,7 @@
 // Color schemes, chosen by an administrator (Settings → Appearance) and applied
 // to the admin interface, the customer portal, both sign-in pages and emails.
-// Each scheme has a light and a dark variant; the panel's default mode is dark
-// (the PVE Panel App UI), light, or the device's setting, chosen by the owner.
+// Each scheme has a light and a dark variant; the panel's default mode is the device's setting
+// (system colors), or always dark or light, chosen by the owner.
 // Contrast is at least 4.5:1 for text (WCAG AA).
 // The colors themselves live in web/shared/styles.css ([data-scheme="…"]).
 
@@ -33,9 +33,9 @@ export function currentScheme() {
 /** May users pick their own scheme and light/dark mode (Account → Appearance)? On by default. */
 export const personalAllowed = () => storedSettings().allowPersonal !== false;
 
-/** The panel's mode for everyone without an own choice: dark (default), light or system (the device's). */
+/** The panel's mode for everyone without an own choice: system (default: the device's), dark or light. */
 export const PANEL_MODES = ['dark', 'light', 'system'];
-export const defaultMode = () => (PANEL_MODES.includes(storedSettings().mode) ? storedSettings().mode : 'dark');
+export const defaultMode = () => (PANEL_MODES.includes(storedSettings().mode) ? storedSettings().mode : 'system');
 
 export function setDefaultMode(mode) {
   if (!PANEL_MODES.includes(mode)) throw Object.assign(new Error('Default mode: dark, light or system'), { statusCode: 400, expose: true });

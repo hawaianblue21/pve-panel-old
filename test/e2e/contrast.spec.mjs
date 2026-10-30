@@ -32,7 +32,7 @@ for (const mode of ['light', 'dark']) {
     };
     try {
       for (const scheme of SCHEMES) {
-        // the panel default is dark; follow the device here so both modes are measured
+        // the panel default follows the device; set it explicitly so both modes are measured
         const r = await admin.request.put(`${A()}/api/admin/settings/appearance`, { data: { scheme, mode: 'system' } });
         expect(r.ok()).toBeTruthy();
 

@@ -11,9 +11,9 @@ before(async () => {
 });
 after(async () => { await stack?.stop(); });
 
-test('default is Harbor in dark mode; five schemes are offered', async () => {
+test('default is Harbor with system colors; eight schemes are offered', async () => {
   assert.equal((await stack.customer().get('/api/brand')).json.scheme, 'harbor');
-  assert.equal((await stack.customer().get('/api/brand')).json.mode, 'dark');
+  assert.equal((await stack.customer().get('/api/brand')).json.mode, 'system');
   const r = (await admin.get('/api/admin/settings/appearance')).json;
   assert.deepEqual(r.schemes.map((s) => s.id), ['harbor', 'forest', 'ember', 'orchid', 'graphite', 'ocean', 'rose', 'sand']);
 });

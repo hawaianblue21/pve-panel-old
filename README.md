@@ -1667,7 +1667,7 @@ Both portals follow the **PVE Panel App UI**: midnight navy surfaces, a grouped 
 Customers & billing, Support, System; customers: Compute, Storage & network, Billing, Support), IBM Plex Sans for text,
 Space Grotesk for headings and figures, JetBrains Mono for labels and data.
 
-Eight color schemes — **Harbor** (default, the App UI's signal blue), **Forest**, **Ember**, **Orchid**, **Graphite**, **Ocean**, **Rose**, **Sand** — each with a light and dark variant. Set in **Settings → Appearance** for everyone: admin interface, customer portal, sign-in pages and emails. The **default mode** for everyone is **dark** (the App UI); the owner can switch it to light or to each device's setting.
+Eight color schemes — **Harbor** (default, the App UI's signal blue), **Forest**, **Ember**, **Orchid**, **Graphite**, **Ocean**, **Rose**, **Sand** — each with a light and dark variant. Set in **Settings → Appearance** for everyone: admin interface, customer portal, sign-in pages and emails. The **default mode** for everyone is **System colors**: light or dark follows each device's setting. The owner can force dark or light for everyone, and users can choose their own (when allowed).
 
 Users can also pick their **own** scheme and mode (**panel default, device, light or dark**) under **Account → Appearance** (stored with
 their account, so it follows them to other devices). The owner can switch this off; everyone then sees the panel's scheme and mode.
